@@ -1,0 +1,125 @@
+- generic [ref=e2]:
+  - alert [ref=e1]
+  - generic [ref=e27]:
+    - navigation [ref=e28]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - link "Coffee App" [ref=e32] [cursor=pointer]:
+            - /url: /
+            - img [ref=e33]
+            - generic [ref=e36]: Coffee App
+          - generic [ref=e37]:
+            - link "Dashboard" [ref=e38] [cursor=pointer]:
+              - /url: /admin
+              - img [ref=e39]
+              - text: Dashboard
+            - link "Productos" [ref=e44] [cursor=pointer]:
+              - /url: /admin/productos
+              - img [ref=e45]
+              - text: Productos
+            - link "Categorías" [active] [ref=e48] [cursor=pointer]:
+              - /url: /admin/categorias
+              - img [ref=e49]
+              - text: Categorías
+            - link "Pedidos" [ref=e51] [cursor=pointer]:
+              - /url: /pedidos
+              - img [ref=e52]
+              - text: Pedidos
+            - link "Contabilidad" [ref=e56] [cursor=pointer]:
+              - /url: /contabilidad
+              - img [ref=e57]
+              - text: Contabilidad
+            - link "Usuarios" [ref=e59] [cursor=pointer]:
+              - /url: /admin/usuarios
+              - img [ref=e60]
+              - text: Usuarios
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Administrador
+            - generic [ref=e69]: manager admin
+          - button "Cerrar sesión" [ref=e70] [cursor=pointer]:
+            - img [ref=e71]
+    - main [ref=e74]:
+      - generic [ref=e724]:
+        - generic [ref=e725]:
+          - generic [ref=e726]:
+            - heading "Categorías" [level=1] [ref=e727]
+            - paragraph [ref=e728]: 5 categorías
+          - button "Nueva Categoría" [ref=e729] [cursor=pointer]:
+            - img [ref=e730]
+            - text: Nueva Categoría
+        - generic [ref=e731]:
+          - generic [ref=e733]:
+            - img [ref=e734]
+            - textbox "Buscar categorías..." [ref=e737]
+          - table [ref=e738]:
+            - rowgroup [ref=e739]:
+              - row "Imagen Nombre Descripción Estado Acciones" [ref=e740]:
+                - columnheader "Imagen" [ref=e741]
+                - columnheader "Nombre" [ref=e742]
+                - columnheader "Descripción" [ref=e743]
+                - columnheader "Estado" [ref=e744]
+                - columnheader "Acciones" [ref=e745]
+            - rowgroup [ref=e746]:
+              - row "Bebidas Calientes Cafés y bebidas calientes Activa" [ref=e747]:
+                - cell [ref=e748]:
+                  - img [ref=e750]
+                - cell "Bebidas Calientes" [ref=e754]
+                - cell "Cafés y bebidas calientes" [ref=e755]
+                - cell "Activa" [ref=e756]
+                - cell [ref=e757]:
+                  - generic [ref=e758]:
+                    - button "Editar" [ref=e759] [cursor=pointer]:
+                      - img [ref=e760]
+                    - button "Eliminar" [ref=e762] [cursor=pointer]:
+                      - img [ref=e763]
+              - row "Bebidas Frías Bebidas frías y refrescantes Activa" [ref=e766]:
+                - cell [ref=e767]:
+                  - img [ref=e769]
+                - cell "Bebidas Frías" [ref=e773]
+                - cell "Bebidas frías y refrescantes" [ref=e774]
+                - cell "Activa" [ref=e775]
+                - cell [ref=e776]:
+                  - generic [ref=e777]:
+                    - button "Editar" [ref=e778] [cursor=pointer]:
+                      - img [ref=e779]
+                    - button "Eliminar" [ref=e781] [cursor=pointer]:
+                      - img [ref=e782]
+              - row "Comidas Sandwiches y snacks Activa" [ref=e785]:
+                - cell [ref=e786]:
+                  - img [ref=e788]
+                - cell "Comidas" [ref=e792]
+                - cell "Sandwiches y snacks" [ref=e793]
+                - cell "Activa" [ref=e794]
+                - cell [ref=e795]:
+                  - generic [ref=e796]:
+                    - button "Editar" [ref=e797] [cursor=pointer]:
+                      - img [ref=e798]
+                    - button "Eliminar" [ref=e800] [cursor=pointer]:
+                      - img [ref=e801]
+              - row "Postres Dulces y repostería Activa" [ref=e804]:
+                - cell [ref=e805]:
+                  - img [ref=e807]
+                - cell "Postres" [ref=e811]
+                - cell "Dulces y repostería" [ref=e812]
+                - cell "Activa" [ref=e813]
+                - cell [ref=e814]:
+                  - generic [ref=e815]:
+                    - button "Editar" [ref=e816] [cursor=pointer]:
+                      - img [ref=e817]
+                    - button "Eliminar" [ref=e819] [cursor=pointer]:
+                      - img [ref=e820]
+              - row "Promociones Ofertas especiales Activa" [ref=e823]:
+                - cell [ref=e824]:
+                  - img [ref=e826]
+                - cell "Promociones" [ref=e830]
+                - cell "Ofertas especiales" [ref=e831]
+                - cell "Activa" [ref=e832]
+                - cell [ref=e833]:
+                  - generic [ref=e834]:
+                    - button "Editar" [ref=e835] [cursor=pointer]:
+                      - img [ref=e836]
+                    - button "Eliminar" [ref=e838] [cursor=pointer]:
+                      - img [ref=e839]
+  - text: "2"
+  - generic [ref=e241]: "0"

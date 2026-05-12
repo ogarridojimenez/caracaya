@@ -1,0 +1,143 @@
+- generic [ref=e2]:
+  - alert [ref=e1]
+  - generic [ref=e27]:
+    - navigation [ref=e28]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - link "Coffee App" [ref=e32] [cursor=pointer]:
+            - /url: /
+            - img [ref=e33]
+            - generic [ref=e36]: Coffee App
+          - generic [ref=e37]:
+            - link "Dashboard" [ref=e38] [cursor=pointer]:
+              - /url: /admin
+              - img [ref=e39]
+              - text: Dashboard
+            - link "Productos" [ref=e44] [cursor=pointer]:
+              - /url: /admin/productos
+              - img [ref=e45]
+              - text: Productos
+            - link "Categorías" [ref=e48] [cursor=pointer]:
+              - /url: /admin/categorias
+              - img [ref=e49]
+              - text: Categorías
+            - link "Pedidos" [ref=e51] [cursor=pointer]:
+              - /url: /pedidos
+              - img [ref=e52]
+              - text: Pedidos
+            - link "Contabilidad" [active] [ref=e56] [cursor=pointer]:
+              - /url: /contabilidad
+              - img [ref=e57]
+              - text: Contabilidad
+            - link "Usuarios" [ref=e59] [cursor=pointer]:
+              - /url: /admin/usuarios
+              - img [ref=e60]
+              - text: Usuarios
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Administrador
+            - generic [ref=e69]: manager admin
+          - button "Cerrar sesión" [ref=e70] [cursor=pointer]:
+            - img [ref=e71]
+    - main [ref=e74]:
+      - generic [ref=e1028]:
+        - generic [ref=e1029]:
+          - generic [ref=e1030]:
+            - heading "Contabilidad" [level=1] [ref=e1031]
+            - paragraph [ref=e1032]: Reporte financiero detallado
+          - generic [ref=e1033]:
+            - combobox [ref=e1034]:
+              - option "Enero"
+              - option "Febrero"
+              - option "Marzo"
+              - option "Abril"
+              - option "Mayo" [selected]
+              - option "Junio"
+              - option "Julio"
+              - option "Agosto"
+              - option "Septiembre"
+              - option "Octubre"
+              - option "Noviembre"
+              - option "Diciembre"
+            - combobox [ref=e1035]:
+              - option "2025"
+              - option "2026" [selected]
+              - option "2027"
+        - generic [ref=e1036]:
+          - generic [ref=e1038]:
+            - generic [ref=e1039]:
+              - paragraph [ref=e1040]: Total del Período
+              - paragraph [ref=e1041]: $5556.50
+            - img [ref=e1042]
+          - generic [ref=e1044]:
+            - generic [ref=e1045]:
+              - generic [ref=e1046]:
+                - paragraph [ref=e1047]: Ventas Mostrador
+                - paragraph [ref=e1048]: $5545.00
+              - img [ref=e1049]
+            - paragraph [ref=e1052]: 1 cierres
+          - generic [ref=e1053]:
+            - generic [ref=e1054]:
+              - generic [ref=e1055]:
+                - paragraph [ref=e1056]: Pedidos Online
+                - paragraph [ref=e1057]: $11.50
+              - img [ref=e1058]
+            - paragraph [ref=e1063]: 1 pedidos completados
+          - generic [ref=e1064]:
+            - generic [ref=e1065]:
+              - generic [ref=e1066]:
+                - paragraph [ref=e1067]: Ticket Promedio
+                - paragraph [ref=e1068]: $5556.50
+              - img [ref=e1069]
+            - paragraph [ref=e1071]: Por pedido completado
+        - generic [ref=e1072]:
+          - generic [ref=e1073]:
+            - button "Resumen" [ref=e1074] [cursor=pointer]
+            - button "Cierres de Caja" [ref=e1075] [cursor=pointer]
+            - button "Pedidos" [ref=e1076] [cursor=pointer]
+          - generic [ref=e1078]:
+            - application [ref=e1081]:
+              - generic [ref=e1098]:
+                - generic [ref=e1101]: 8 may
+                - generic [ref=e1102]:
+                  - generic [ref=e1104]: "0"
+                  - generic [ref=e1106]: "1500"
+                  - generic [ref=e1108]: "3000"
+                  - generic [ref=e1110]: "4500"
+                  - generic [ref=e1112]: "6000"
+            - generic [ref=e1113]:
+              - generic [ref=e1114]:
+                - heading "Comparación Mensual (2026)" [level=4] [ref=e1115]
+                - application [ref=e1118]:
+                  - generic [ref=e1164]:
+                    - generic [ref=e1165]:
+                      - generic [ref=e1167]: Enero
+                      - generic [ref=e1169]: Febrero
+                      - generic [ref=e1171]: Marzo
+                      - generic [ref=e1173]: Abril
+                      - generic [ref=e1175]: Mayo
+                      - generic [ref=e1177]: Junio
+                      - generic [ref=e1179]: Julio
+                      - generic [ref=e1181]: Agosto
+                      - generic [ref=e1183]: Octubre
+                      - generic [ref=e1185]: Diciembre
+                    - generic [ref=e1186]:
+                      - generic [ref=e1188]: "0"
+                      - generic [ref=e1190]: "1500"
+                      - generic [ref=e1192]: "3000"
+                      - generic [ref=e1194]: "4500"
+                      - generic [ref=e1196]: "6000"
+              - generic [ref=e1197]:
+                - heading "Detalle del Período" [level=4] [ref=e1198]
+                - generic [ref=e1199]:
+                  - generic [ref=e1200]:
+                    - generic [ref=e1201]: Cierres de caja
+                    - generic [ref=e1202]: $5545.00
+                  - generic [ref=e1203]:
+                    - generic [ref=e1204]: Pedidos completados
+                    - generic [ref=e1205]: $11.50
+                  - generic [ref=e1206]:
+                    - generic [ref=e1207]: Total
+                    - generic [ref=e1208]: $5556.50
+  - text: "2"
+  - generic [ref=e241]: "1500"

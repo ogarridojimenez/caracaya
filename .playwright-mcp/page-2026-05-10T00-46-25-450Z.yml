@@ -1,0 +1,125 @@
+- generic [ref=e2]:
+  - alert [ref=e1]
+  - generic [ref=e27]:
+    - navigation [ref=e28]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - link "Coffee App" [ref=e32] [cursor=pointer]:
+            - /url: /
+            - img [ref=e33]
+            - generic [ref=e36]: Coffee App
+          - generic [ref=e37]:
+            - link "Dashboard" [ref=e38] [cursor=pointer]:
+              - /url: /admin
+              - img [ref=e39]
+              - text: Dashboard
+            - link "Productos" [ref=e44] [cursor=pointer]:
+              - /url: /admin/productos
+              - img [ref=e45]
+              - text: Productos
+            - link "Categorías" [ref=e48] [cursor=pointer]:
+              - /url: /admin/categorias
+              - img [ref=e49]
+              - text: Categorías
+            - link "Pedidos" [active] [ref=e51] [cursor=pointer]:
+              - /url: /pedidos
+              - img [ref=e52]
+              - text: Pedidos
+            - link "Contabilidad" [ref=e56] [cursor=pointer]:
+              - /url: /contabilidad
+              - img [ref=e57]
+              - text: Contabilidad
+            - link "Usuarios" [ref=e59] [cursor=pointer]:
+              - /url: /admin/usuarios
+              - img [ref=e60]
+              - text: Usuarios
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Administrador
+            - generic [ref=e69]: manager admin
+          - button "Cerrar sesión" [ref=e70] [cursor=pointer]:
+            - img [ref=e71]
+    - main [ref=e74]:
+      - generic [ref=e931]:
+        - generic [ref=e932]:
+          - heading "Pedidos" [level=1] [ref=e933]:
+            - img [ref=e934]
+            - text: Pedidos
+          - generic [ref=e938]:
+            - img [ref=e939]
+            - text: 3 de 3 pedidos
+        - generic [ref=e945]:
+          - generic [ref=e946]:
+            - img [ref=e947]
+            - textbox "Buscar por pedido, cliente o producto..." [ref=e950]
+          - combobox [ref=e951]:
+            - option "Todos los estados" [selected]
+            - option "Pendiente"
+            - option "Confirmado"
+            - option "Preparando"
+            - option "Listo"
+            - option "Completado"
+            - option "Cancelado"
+        - generic [ref=e952]:
+          - generic [ref=e953]:
+            - generic [ref=e954]:
+              - generic [ref=e955]:
+                - generic [ref=e957]: ORD-0003
+                - generic [ref=e959]:
+                  - img [ref=e960]
+                  - text: Completado
+              - generic [ref=e962]:
+                - img [ref=e963]
+                - text: vie, 8 may, 18:14
+            - generic [ref=e966]:
+              - generic [ref=e967]:
+                - generic [ref=e968]: Total
+                - generic [ref=e969]: $11.50
+              - paragraph [ref=e970]:
+                - img [ref=e971]
+                - text: "Recoger a las:"
+                - generic [ref=e974]: 19:14
+          - generic [ref=e975]:
+            - generic [ref=e976]:
+              - generic [ref=e977]:
+                - generic [ref=e979]: ORD-0002
+                - generic [ref=e981]:
+                  - img [ref=e982]
+                  - text: Confirmado
+              - generic [ref=e984]:
+                - img [ref=e985]
+                - text: vie, 8 may, 18:12
+            - generic [ref=e988]:
+              - generic [ref=e989]:
+                - generic [ref=e990]: Total
+                - generic [ref=e991]: $13.00
+              - paragraph [ref=e992]:
+                - img [ref=e993]
+                - text: "Recoger a las:"
+                - generic [ref=e996]: 19:11
+            - button "Marcar como Preparando" [ref=e998] [cursor=pointer]:
+              - img [ref=e999]
+              - text: Marcar como Preparando
+          - generic [ref=e1001]:
+            - generic [ref=e1002]:
+              - generic [ref=e1003]:
+                - generic [ref=e1005]: ORD-0001
+                - generic [ref=e1007]:
+                  - img [ref=e1008]
+                  - text: Pendiente
+              - generic [ref=e1011]:
+                - img [ref=e1012]
+                - text: vie, 8 may, 17:46
+            - generic [ref=e1015]:
+              - generic [ref=e1016]:
+                - generic [ref=e1017]: Total
+                - generic [ref=e1018]: $10.50
+              - paragraph [ref=e1019]:
+                - img [ref=e1020]
+                - text: "Recoger a las:"
+                - generic [ref=e1023]: 18:46
+            - button "Marcar como Confirmado" [ref=e1025] [cursor=pointer]:
+              - img [ref=e1026]
+              - text: Marcar como Confirmado
+  - text: "2"
+  - generic [ref=e241]: "0"

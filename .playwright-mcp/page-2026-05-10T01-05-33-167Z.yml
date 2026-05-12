@@ -1,0 +1,417 @@
+- generic [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e5]:
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - link "Coffee App" [ref=e9] [cursor=pointer]:
+            - /url: /
+            - img [ref=e10]
+            - generic [ref=e13]: Coffee App
+          - generic [ref=e14]:
+            - link "Dashboard" [ref=e15] [cursor=pointer]:
+              - /url: /admin
+              - img [ref=e16]
+              - text: Dashboard
+            - link "Productos" [ref=e21] [cursor=pointer]:
+              - /url: /admin/productos
+              - img [ref=e22]
+              - text: Productos
+            - link "Categorías" [ref=e25] [cursor=pointer]:
+              - /url: /admin/categorias
+              - img [ref=e26]
+              - text: Categorías
+            - link "Pedidos" [ref=e28] [cursor=pointer]:
+              - /url: /pedidos
+              - img [ref=e29]
+              - text: Pedidos
+            - link "Contabilidad" [ref=e33] [cursor=pointer]:
+              - /url: /contabilidad
+              - img [ref=e34]
+              - text: Contabilidad
+            - link "Usuarios" [ref=e36] [cursor=pointer]:
+              - /url: /admin/usuarios
+              - img [ref=e37]
+              - text: Usuarios
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - paragraph [ref=e45]: Administrador
+            - generic [ref=e46]: manager admin
+          - link "Mi Perfil" [ref=e47] [cursor=pointer]:
+            - /url: /perfil
+            - img [ref=e48]
+          - button "Cerrar sesión" [ref=e51] [cursor=pointer]:
+            - img [ref=e52]
+    - main [ref=e55]:
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - heading "Productos" [level=1] [ref=e59]
+            - paragraph [ref=e60]: 21 productos en el catálogo
+          - button "Nuevo Producto" [active] [ref=e61] [cursor=pointer]:
+            - img [ref=e62]
+            - text: Nuevo Producto
+        - generic [ref=e63]:
+          - generic [ref=e65]:
+            - img [ref=e66]
+            - textbox "Buscar por nombre o categoría..." [ref=e69]
+          - table [ref=e70]:
+            - rowgroup [ref=e71]:
+              - row "Imagen Nombre Categoría Precio Estado Acciones" [ref=e72]:
+                - columnheader "Imagen" [ref=e73]
+                - columnheader "Nombre" [ref=e74]
+                - columnheader "Categoría" [ref=e75]
+                - columnheader "Precio" [ref=e76]
+                - columnheader "Estado" [ref=e77]
+                - columnheader "Acciones" [ref=e78]
+            - rowgroup [ref=e79]:
+              - row "Americano Café negro fuerte, elaborado con granos de altura $2.50 Activo" [ref=e80]:
+                - cell [ref=e81]:
+                  - img [ref=e83]
+                - cell "Americano Café negro fuerte, elaborado con granos de altura" [ref=e87]:
+                  - generic [ref=e88]: Americano
+                  - generic [ref=e89]: Café negro fuerte, elaborado con granos de altura
+                - cell [ref=e90]
+                - cell "$2.50" [ref=e91]
+                - cell "Activo" [ref=e92]
+                - cell [ref=e93]:
+                  - generic [ref=e94]:
+                    - button "Editar" [ref=e95] [cursor=pointer]:
+                      - img [ref=e96]
+                    - button "Eliminar" [ref=e98] [cursor=pointer]:
+                      - img [ref=e99]
+              - row "Bagel con Cream Cheese Bagel tostado con queso crema $4.50 Activo" [ref=e102]:
+                - cell [ref=e103]:
+                  - img [ref=e105]
+                - cell "Bagel con Cream Cheese Bagel tostado con queso crema" [ref=e109]:
+                  - generic [ref=e110]: Bagel con Cream Cheese
+                  - generic [ref=e111]: Bagel tostado con queso crema
+                - cell [ref=e112]
+                - cell "$4.50" [ref=e113]
+                - cell "Activo" [ref=e114]
+                - cell [ref=e115]:
+                  - generic [ref=e116]:
+                    - button "Editar" [ref=e117] [cursor=pointer]:
+                      - img [ref=e118]
+                    - button "Eliminar" [ref=e120] [cursor=pointer]:
+                      - img [ref=e121]
+              - row "Brownie Bizcocho de chocolate con nueces $3.50 Activo" [ref=e124]:
+                - cell [ref=e125]:
+                  - img [ref=e127]
+                - cell "Brownie Bizcocho de chocolate con nueces" [ref=e131]:
+                  - generic [ref=e132]: Brownie
+                  - generic [ref=e133]: Bizcocho de chocolate con nueces
+                - cell [ref=e134]
+                - cell "$3.50" [ref=e135]
+                - cell "Activo" [ref=e136]
+                - cell [ref=e137]:
+                  - generic [ref=e138]:
+                    - button "Editar" [ref=e139] [cursor=pointer]:
+                      - img [ref=e140]
+                    - button "Eliminar" [ref=e142] [cursor=pointer]:
+                      - img [ref=e143]
+              - row "Cappuccino Espresso con espuma de leche cremosa $3.50 Activo" [ref=e146]:
+                - cell [ref=e147]:
+                  - img [ref=e149]
+                - cell "Cappuccino Espresso con espuma de leche cremosa" [ref=e153]:
+                  - generic [ref=e154]: Cappuccino
+                  - generic [ref=e155]: Espresso con espuma de leche cremosa
+                - cell [ref=e156]
+                - cell "$3.50" [ref=e157]
+                - cell "Activo" [ref=e158]
+                - cell [ref=e159]:
+                  - generic [ref=e160]:
+                    - button "Editar" [ref=e161] [cursor=pointer]:
+                      - img [ref=e162]
+                    - button "Eliminar" [ref=e164] [cursor=pointer]:
+                      - img [ref=e165]
+              - row "Cheesecake Tarta de queso NY style $4.50 Activo" [ref=e168]:
+                - cell [ref=e169]:
+                  - img [ref=e171]
+                - cell "Cheesecake Tarta de queso NY style" [ref=e175]:
+                  - generic [ref=e176]: Cheesecake
+                  - generic [ref=e177]: Tarta de queso NY style
+                - cell [ref=e178]
+                - cell "$4.50" [ref=e179]
+                - cell "Activo" [ref=e180]
+                - cell [ref=e181]:
+                  - generic [ref=e182]:
+                    - button "Editar" [ref=e183] [cursor=pointer]:
+                      - img [ref=e184]
+                    - button "Eliminar" [ref=e186] [cursor=pointer]:
+                      - img [ref=e187]
+              - row "Chocolate Caliente Chocolate belga con crema $3.00 Activo" [ref=e190]:
+                - cell [ref=e191]:
+                  - img [ref=e193]
+                - cell "Chocolate Caliente Chocolate belga con crema" [ref=e197]:
+                  - generic [ref=e198]: Chocolate Caliente
+                  - generic [ref=e199]: Chocolate belga con crema
+                - cell [ref=e200]
+                - cell "$3.00" [ref=e201]
+                - cell "Activo" [ref=e202]
+                - cell [ref=e203]:
+                  - generic [ref=e204]:
+                    - button "Editar" [ref=e205] [cursor=pointer]:
+                      - img [ref=e206]
+                    - button "Eliminar" [ref=e208] [cursor=pointer]:
+                      - img [ref=e209]
+              - row "Croissant de Jamón Croissant tostado con jamón y queso $5.50 Activo" [ref=e212]:
+                - cell [ref=e213]:
+                  - img [ref=e215]
+                - cell "Croissant de Jamón Croissant tostado con jamón y queso" [ref=e219]:
+                  - generic [ref=e220]: Croissant de Jamón
+                  - generic [ref=e221]: Croissant tostado con jamón y queso
+                - cell [ref=e222]
+                - cell "$5.50" [ref=e223]
+                - cell "Activo" [ref=e224]
+                - cell [ref=e225]:
+                  - generic [ref=e226]:
+                    - button "Editar" [ref=e227] [cursor=pointer]:
+                      - img [ref=e228]
+                    - button "Eliminar" [ref=e230] [cursor=pointer]:
+                      - img [ref=e231]
+              - row "Ensalada César Lechuga romana, pollo, parmesano $7.50 Activo" [ref=e234]:
+                - cell [ref=e235]:
+                  - img [ref=e237]
+                - cell "Ensalada César Lechuga romana, pollo, parmesano" [ref=e241]:
+                  - generic [ref=e242]: Ensalada César
+                  - generic [ref=e243]: Lechuga romana, pollo, parmesano
+                - cell [ref=e244]
+                - cell "$7.50" [ref=e245]
+                - cell "Activo" [ref=e246]
+                - cell [ref=e247]:
+                  - generic [ref=e248]:
+                    - button "Editar" [ref=e249] [cursor=pointer]:
+                      - img [ref=e250]
+                    - button "Eliminar" [ref=e252] [cursor=pointer]:
+                      - img [ref=e253]
+              - row "Espresso Café concentrado single origin $2.00 Activo" [ref=e256]:
+                - cell [ref=e257]:
+                  - img [ref=e259]
+                - cell "Espresso Café concentrado single origin" [ref=e263]:
+                  - generic [ref=e264]: Espresso
+                  - generic [ref=e265]: Café concentrado single origin
+                - cell [ref=e266]
+                - cell "$2.00" [ref=e267]
+                - cell "Activo" [ref=e268]
+                - cell [ref=e269]:
+                  - generic [ref=e270]:
+                    - button "Editar" [ref=e271] [cursor=pointer]:
+                      - img [ref=e272]
+                    - button "Eliminar" [ref=e274] [cursor=pointer]:
+                      - img [ref=e275]
+              - row "Frappe Bebida helada blend con café $4.50 Activo" [ref=e278]:
+                - cell [ref=e279]:
+                  - img [ref=e281]
+                - cell "Frappe Bebida helada blend con café" [ref=e285]:
+                  - generic [ref=e286]: Frappe
+                  - generic [ref=e287]: Bebida helada blend con café
+                - cell [ref=e288]
+                - cell "$4.50" [ref=e289]
+                - cell "Activo" [ref=e290]
+                - cell [ref=e291]:
+                  - generic [ref=e292]:
+                    - button "Editar" [ref=e293] [cursor=pointer]:
+                      - img [ref=e294]
+                    - button "Eliminar" [ref=e296] [cursor=pointer]:
+                      - img [ref=e297]
+              - row "Galleta de Avena Galleta artesanal con chips de chocolate $2.50 Activo" [ref=e300]:
+                - cell [ref=e301]:
+                  - img [ref=e303]
+                - cell "Galleta de Avena Galleta artesanal con chips de chocolate" [ref=e307]:
+                  - generic [ref=e308]: Galleta de Avena
+                  - generic [ref=e309]: Galleta artesanal con chips de chocolate
+                - cell [ref=e310]
+                - cell "$2.50" [ref=e311]
+                - cell "Activo" [ref=e312]
+                - cell [ref=e313]:
+                  - generic [ref=e314]:
+                    - button "Editar" [ref=e315] [cursor=pointer]:
+                      - img [ref=e316]
+                    - button "Eliminar" [ref=e318] [cursor=pointer]:
+                      - img [ref=e319]
+              - row "Hamber3 Hamber3 zzxzx $360.00 Activo" [ref=e322]:
+                - cell "Hamber3" [ref=e323]:
+                  - img "Hamber3" [ref=e324]
+                - cell "Hamber3 zzxzx" [ref=e325]:
+                  - generic [ref=e326]: Hamber3
+                  - generic [ref=e327]: zzxzx
+                - cell [ref=e328]
+                - cell "$360.00" [ref=e329]
+                - cell "Activo" [ref=e330]
+                - cell [ref=e331]:
+                  - generic [ref=e332]:
+                    - button "Editar" [ref=e333] [cursor=pointer]:
+                      - img [ref=e334]
+                    - button "Eliminar" [ref=e336] [cursor=pointer]:
+                      - img [ref=e337]
+              - row "Iced Americano Café frío con hielo $3.00 Activo" [ref=e340]:
+                - cell [ref=e341]:
+                  - img [ref=e343]
+                - cell "Iced Americano Café frío con hielo" [ref=e347]:
+                  - generic [ref=e348]: Iced Americano
+                  - generic [ref=e349]: Café frío con hielo
+                - cell [ref=e350]
+                - cell "$3.00" [ref=e351]
+                - cell "Activo" [ref=e352]
+                - cell [ref=e353]:
+                  - generic [ref=e354]:
+                    - button "Editar" [ref=e355] [cursor=pointer]:
+                      - img [ref=e356]
+                    - button "Eliminar" [ref=e358] [cursor=pointer]:
+                      - img [ref=e359]
+              - row "Iced Latte Espresso frío con leche $4.00 Activo" [ref=e362]:
+                - cell [ref=e363]:
+                  - img [ref=e365]
+                - cell "Iced Latte Espresso frío con leche" [ref=e369]:
+                  - generic [ref=e370]: Iced Latte
+                  - generic [ref=e371]: Espresso frío con leche
+                - cell [ref=e372]
+                - cell "$4.00" [ref=e373]
+                - cell "Activo" [ref=e374]
+                - cell [ref=e375]:
+                  - generic [ref=e376]:
+                    - button "Editar" [ref=e377] [cursor=pointer]:
+                      - img [ref=e378]
+                    - button "Eliminar" [ref=e380] [cursor=pointer]:
+                      - img [ref=e381]
+              - row "Latte Espresso con leche espumada $3.50 Activo" [ref=e384]:
+                - cell [ref=e385]:
+                  - img [ref=e387]
+                - cell "Latte Espresso con leche espumada" [ref=e391]:
+                  - generic [ref=e392]: Latte
+                  - generic [ref=e393]: Espresso con leche espumada
+                - cell [ref=e394]
+                - cell "$3.50" [ref=e395]
+                - cell "Activo" [ref=e396]
+                - cell [ref=e397]:
+                  - generic [ref=e398]:
+                    - button "Editar" [ref=e399] [cursor=pointer]:
+                      - img [ref=e400]
+                    - button "Eliminar" [ref=e402] [cursor=pointer]:
+                      - img [ref=e403]
+              - row "Limonada Natural Limón fresco con hierbabuena $3.50 Activo" [ref=e406]:
+                - cell [ref=e407]:
+                  - img [ref=e409]
+                - cell "Limonada Natural Limón fresco con hierbabuena" [ref=e413]:
+                  - generic [ref=e414]: Limonada Natural
+                  - generic [ref=e415]: Limón fresco con hierbabuena
+                - cell [ref=e416]
+                - cell "$3.50" [ref=e417]
+                - cell "Activo" [ref=e418]
+                - cell [ref=e419]:
+                  - generic [ref=e420]:
+                    - button "Editar" [ref=e421] [cursor=pointer]:
+                      - img [ref=e422]
+                    - button "Eliminar" [ref=e424] [cursor=pointer]:
+                      - img [ref=e425]
+              - row "Mocha Espresso con chocolate y leche $4.00 Activo" [ref=e428]:
+                - cell [ref=e429]:
+                  - img [ref=e431]
+                - cell "Mocha Espresso con chocolate y leche" [ref=e435]:
+                  - generic [ref=e436]: Mocha
+                  - generic [ref=e437]: Espresso con chocolate y leche
+                - cell [ref=e438]
+                - cell "$4.00" [ref=e439]
+                - cell "Activo" [ref=e440]
+                - cell [ref=e441]:
+                  - generic [ref=e442]:
+                    - button "Editar" [ref=e443] [cursor=pointer]:
+                      - img [ref=e444]
+                    - button "Eliminar" [ref=e446] [cursor=pointer]:
+                      - img [ref=e447]
+              - row "Sandwich Integral Pan integral con pollo y verduras $6.00 Activo" [ref=e450]:
+                - cell [ref=e451]:
+                  - img [ref=e453]
+                - cell "Sandwich Integral Pan integral con pollo y verduras" [ref=e457]:
+                  - generic [ref=e458]: Sandwich Integral
+                  - generic [ref=e459]: Pan integral con pollo y verduras
+                - cell [ref=e460]
+                - cell "$6.00" [ref=e461]
+                - cell "Activo" [ref=e462]
+                - cell [ref=e463]:
+                  - generic [ref=e464]:
+                    - button "Editar" [ref=e465] [cursor=pointer]:
+                      - img [ref=e466]
+                    - button "Eliminar" [ref=e468] [cursor=pointer]:
+                      - img [ref=e469]
+              - row "Smoothie de Frutas Mezcla de frutas frescas $5.00 Activo" [ref=e472]:
+                - cell [ref=e473]:
+                  - img [ref=e475]
+                - cell "Smoothie de Frutas Mezcla de frutas frescas" [ref=e479]:
+                  - generic [ref=e480]: Smoothie de Frutas
+                  - generic [ref=e481]: Mezcla de frutas frescas
+                - cell [ref=e482]
+                - cell "$5.00" [ref=e483]
+                - cell "Activo" [ref=e484]
+                - cell [ref=e485]:
+                  - generic [ref=e486]:
+                    - button "Editar" [ref=e487] [cursor=pointer]:
+                      - img [ref=e488]
+                    - button "Eliminar" [ref=e490] [cursor=pointer]:
+                      - img [ref=e491]
+              - row "Té Verde Té japonés Matcha premium $4.50 Activo" [ref=e494]:
+                - cell [ref=e495]:
+                  - img [ref=e497]
+                - cell "Té Verde Té japonés Matcha premium" [ref=e501]:
+                  - generic [ref=e502]: Té Verde
+                  - generic [ref=e503]: Té japonés Matcha premium
+                - cell [ref=e504]
+                - cell "$4.50" [ref=e505]
+                - cell "Activo" [ref=e506]
+                - cell [ref=e507]:
+                  - generic [ref=e508]:
+                    - button "Editar" [ref=e509] [cursor=pointer]:
+                      - img [ref=e510]
+                    - button "Eliminar" [ref=e512] [cursor=pointer]:
+                      - img [ref=e513]
+              - row "Tiramisú Postre italiano con café $5.00 Activo" [ref=e516]:
+                - cell [ref=e517]:
+                  - img [ref=e519]
+                - cell "Tiramisú Postre italiano con café" [ref=e523]:
+                  - generic [ref=e524]: Tiramisú
+                  - generic [ref=e525]: Postre italiano con café
+                - cell [ref=e526]
+                - cell "$5.00" [ref=e527]
+                - cell "Activo" [ref=e528]
+                - cell [ref=e529]:
+                  - generic [ref=e530]:
+                    - button "Editar" [ref=e531] [cursor=pointer]:
+                      - img [ref=e532]
+                    - button "Eliminar" [ref=e534] [cursor=pointer]:
+                      - img [ref=e535]
+        - generic [ref=e539]:
+          - generic [ref=e540]:
+            - heading "Nuevo Producto" [level=2] [ref=e541]
+            - button [ref=e542] [cursor=pointer]:
+              - img [ref=e543]
+          - generic [ref=e546]:
+            - generic [ref=e547]:
+              - generic [ref=e548]: Nombre *
+              - textbox [ref=e549]
+            - generic [ref=e550]:
+              - generic [ref=e551]: Descripción
+              - textbox [ref=e552]
+            - generic [ref=e553]:
+              - generic [ref=e554]:
+                - generic [ref=e555]: Precio *
+                - spinbutton [ref=e556]
+              - generic [ref=e557]:
+                - generic [ref=e558]: Categoría
+                - combobox [ref=e559]:
+                  - option "Bebidas" [selected]
+                  - option "Comidas"
+                  - option "Postres"
+                  - option "Snacks"
+                  - option "Combos"
+            - generic [ref=e560]:
+              - generic [ref=e561]: Imagen del Producto
+              - generic [ref=e564] [cursor=pointer]:
+                - img [ref=e565]
+                - paragraph [ref=e568]: Arrastra una imagen o haz clic para seleccionar
+                - paragraph [ref=e569]: JPG, PNG o WebP — máximo 2MB
+            - generic [ref=e570]:
+              - checkbox "Producto disponible" [checked] [ref=e571]
+              - generic [ref=e572]: Producto disponible
+            - button "Crear Producto" [ref=e573] [cursor=pointer]
+  - text: "2"

@@ -1,0 +1,110 @@
+- generic [ref=e2]:
+  - alert [ref=e1]
+  - generic [ref=e27]:
+    - navigation [ref=e28]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - link "Coffee App" [ref=e32] [cursor=pointer]:
+            - /url: /
+            - img [ref=e33]
+            - generic [ref=e36]: Coffee App
+          - generic [ref=e37]:
+            - link "Dashboard" [ref=e38] [cursor=pointer]:
+              - /url: /admin
+              - img [ref=e39]
+              - text: Dashboard
+            - link "Productos" [ref=e44] [cursor=pointer]:
+              - /url: /admin/productos
+              - img [ref=e45]
+              - text: Productos
+            - link "Categorías" [ref=e48] [cursor=pointer]:
+              - /url: /admin/categorias
+              - img [ref=e49]
+              - text: Categorías
+            - link "Pedidos" [ref=e51] [cursor=pointer]:
+              - /url: /pedidos
+              - img [ref=e52]
+              - text: Pedidos
+            - link "Contabilidad" [ref=e56] [cursor=pointer]:
+              - /url: /contabilidad
+              - img [ref=e57]
+              - text: Contabilidad
+            - link "Usuarios" [active] [ref=e59] [cursor=pointer]:
+              - /url: /admin/usuarios
+              - img [ref=e60]
+              - text: Usuarios
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Administrador
+            - generic [ref=e69]: manager admin
+          - button "Cerrar sesión" [ref=e70] [cursor=pointer]:
+            - img [ref=e71]
+    - main [ref=e74]:
+      - generic [ref=e842]:
+        - generic [ref=e843]:
+          - generic [ref=e844]:
+            - heading "Usuarios" [level=1] [ref=e845]
+            - paragraph [ref=e846]: 3 usuarios registrados
+          - button "Nuevo Usuario" [ref=e847] [cursor=pointer]:
+            - img [ref=e848]
+            - text: Nuevo Usuario
+        - generic [ref=e849]:
+          - generic [ref=e851]:
+            - img [ref=e852]
+            - textbox "Buscar por nombre o email..." [ref=e855]
+          - table [ref=e856]:
+            - rowgroup [ref=e857]:
+              - row "Nombre Email Rol Fecha Acciones" [ref=e858]:
+                - columnheader "Nombre" [ref=e859]
+                - columnheader "Email" [ref=e860]
+                - columnheader "Rol" [ref=e861]
+                - columnheader "Fecha" [ref=e862]
+                - columnheader "Acciones" [ref=e863]
+            - rowgroup [ref=e864]:
+              - row "Administrador admin@micafeteria.com Administrador 9/5/2026" [ref=e865]:
+                - cell "Administrador" [ref=e866]:
+                  - generic [ref=e867]:
+                    - img [ref=e869]
+                    - generic [ref=e872]: Administrador
+                - cell "admin@micafeteria.com" [ref=e873]
+                - cell "Administrador" [ref=e874]:
+                  - generic [ref=e875]: Administrador
+                - cell "9/5/2026" [ref=e876]
+                - cell [ref=e877]:
+                  - generic [ref=e878]:
+                    - button "Editar rol" [ref=e879] [cursor=pointer]:
+                      - img [ref=e880]
+                    - button "Eliminar usuario" [ref=e883] [cursor=pointer]:
+                      - img [ref=e884]
+              - row "Maria Mari vendedor@micafeteria.com Vendedor 8/5/2026" [ref=e887]:
+                - cell "Maria Mari" [ref=e888]:
+                  - generic [ref=e889]:
+                    - img [ref=e891]
+                    - generic [ref=e894]: Maria Mari
+                - cell "vendedor@micafeteria.com" [ref=e895]
+                - cell "Vendedor" [ref=e896]:
+                  - generic [ref=e897]: Vendedor
+                - cell "8/5/2026" [ref=e898]
+                - cell [ref=e899]:
+                  - generic [ref=e900]:
+                    - button "Editar rol" [ref=e901] [cursor=pointer]:
+                      - img [ref=e902]
+                    - button "Eliminar usuario" [ref=e905] [cursor=pointer]:
+                      - img [ref=e906]
+              - row "Omar Luis admin1@gmail.com Cliente 8/5/2026" [ref=e909]:
+                - cell "Omar Luis" [ref=e910]:
+                  - generic [ref=e911]:
+                    - img [ref=e913]
+                    - generic [ref=e916]: Omar Luis
+                - cell "admin1@gmail.com" [ref=e917]
+                - cell "Cliente" [ref=e918]:
+                  - generic [ref=e919]: Cliente
+                - cell "8/5/2026" [ref=e920]
+                - cell [ref=e921]:
+                  - generic [ref=e922]:
+                    - button "Editar rol" [ref=e923] [cursor=pointer]:
+                      - img [ref=e924]
+                    - button "Eliminar usuario" [ref=e927] [cursor=pointer]:
+                      - img [ref=e928]
+  - text: "2"
+  - generic [ref=e241]: "0"

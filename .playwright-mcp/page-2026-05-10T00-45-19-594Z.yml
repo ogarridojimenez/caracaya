@@ -1,0 +1,153 @@
+- generic [active] [ref=e2]:
+  - alert [ref=e1]
+  - generic [ref=e27]:
+    - navigation [ref=e28]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - link "Coffee App" [ref=e32] [cursor=pointer]:
+            - /url: /
+            - img [ref=e33]
+            - generic [ref=e36]: Coffee App
+          - generic [ref=e37]:
+            - link "Dashboard" [ref=e38] [cursor=pointer]:
+              - /url: /admin
+              - img [ref=e39]
+              - text: Dashboard
+            - link "Productos" [ref=e44] [cursor=pointer]:
+              - /url: /admin/productos
+              - img [ref=e45]
+              - text: Productos
+            - link "Categorías" [ref=e48] [cursor=pointer]:
+              - /url: /admin/categorias
+              - img [ref=e49]
+              - text: Categorías
+            - link "Pedidos" [ref=e51] [cursor=pointer]:
+              - /url: /pedidos
+              - img [ref=e52]
+              - text: Pedidos
+            - link "Contabilidad" [ref=e56] [cursor=pointer]:
+              - /url: /contabilidad
+              - img [ref=e57]
+              - text: Contabilidad
+            - link "Usuarios" [ref=e59] [cursor=pointer]:
+              - /url: /admin/usuarios
+              - img [ref=e60]
+              - text: Usuarios
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Administrador
+            - generic [ref=e69]: manager admin
+          - button "Cerrar sesión" [ref=e70] [cursor=pointer]:
+            - img [ref=e71]
+    - main [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - heading "Dashboard" [level=1] [ref=e77]
+          - paragraph [ref=e78]: Resumen general de la cafetería
+        - generic [ref=e80]:
+          - img [ref=e81]
+          - generic [ref=e83]:
+            - paragraph [ref=e84]: 2 pedidos pendientes
+            - paragraph [ref=e85]: Requieren atención inmediata
+          - link "Ver" [ref=e86] [cursor=pointer]:
+            - /url: /admin/orders?status=pending
+        - generic [ref=e87]:
+          - generic [ref=e88]:
+            - generic [ref=e89]:
+              - generic [ref=e90]:
+                - paragraph [ref=e91]: Ingresos Totales
+                - paragraph [ref=e92]: $5556.50
+              - img [ref=e93]
+            - generic [ref=e95]:
+              - generic [ref=e96]: "Mostrador: $5545.00"
+              - generic [ref=e97]: "Online: $11.50"
+          - generic [ref=e98]:
+            - generic [ref=e99]:
+              - generic [ref=e100]:
+                - paragraph [ref=e101]: Pedidos Completados
+                - paragraph [ref=e102]: "1"
+              - img [ref=e103]
+            - paragraph [ref=e106]: "Ticket promedio: $11.50"
+          - generic [ref=e107]:
+            - generic [ref=e108]:
+              - generic [ref=e109]:
+                - paragraph [ref=e110]: Pedidos Activos
+                - paragraph [ref=e111]: "2"
+              - img [ref=e112]
+            - paragraph [ref=e115]: En proceso
+          - generic [ref=e116]:
+            - generic [ref=e117]:
+              - generic [ref=e118]:
+                - paragraph [ref=e119]: Cierres de Caja
+                - paragraph [ref=e120]: "1"
+              - img [ref=e121]
+            - paragraph [ref=e125]: Registrados
+        - generic [ref=e126]:
+          - generic [ref=e127]:
+            - heading "Ventas por Día (últimos 14 días)" [level=3] [ref=e128]
+            - application [ref=e131]:
+              - generic [ref=e148]:
+                - generic [ref=e151]: 7 may
+                - generic [ref=e152]:
+                  - generic [ref=e154]: "0"
+                  - generic [ref=e156]: "3"
+                  - generic [ref=e158]: "6"
+                  - generic [ref=e160]: "9"
+                  - generic [ref=e162]: "12"
+          - generic [ref=e163]:
+            - heading "Pedidos por Estado" [level=3] [ref=e164]
+            - generic [ref=e165]:
+              - generic [ref=e166]:
+                - generic [ref=e169]: Pendiente
+                - generic [ref=e170]: "1"
+              - generic [ref=e171]:
+                - generic [ref=e174]: Confirmado
+                - generic [ref=e175]: "1"
+              - generic [ref=e176]:
+                - generic [ref=e179]: Preparando
+                - generic [ref=e180]: "0"
+              - generic [ref=e181]:
+                - generic [ref=e184]: Listo
+                - generic [ref=e185]: "0"
+              - generic [ref=e186]:
+                - generic [ref=e189]: Completado
+                - generic [ref=e190]: "1"
+              - generic [ref=e191]:
+                - generic [ref=e194]: Cancelado
+                - generic [ref=e195]: "0"
+            - generic [ref=e196]:
+              - generic [ref=e197]: Total
+              - generic [ref=e198]: "3"
+        - generic [ref=e199]:
+          - link "Productos Gestionar catálogo" [ref=e200] [cursor=pointer]:
+            - /url: /admin/productos
+            - img [ref=e202]
+            - generic [ref=e205]:
+              - heading "Productos" [level=3] [ref=e206]
+              - paragraph [ref=e207]: Gestionar catálogo
+          - link "Categorías Gestionar categorías" [ref=e208] [cursor=pointer]:
+            - /url: /admin/categorias
+            - img [ref=e210]
+            - generic [ref=e212]:
+              - heading "Categorías" [level=3] [ref=e213]
+              - paragraph [ref=e214]: Gestionar categorías
+          - link "Pedidos Ver todos los pedidos" [ref=e215] [cursor=pointer]:
+            - /url: /pedidos
+            - img [ref=e217]
+            - generic [ref=e221]:
+              - heading "Pedidos" [level=3] [ref=e222]
+              - paragraph [ref=e223]: Ver todos los pedidos
+          - link "Contabilidad Reportes detallados" [ref=e224] [cursor=pointer]:
+            - /url: /contabilidad
+            - img [ref=e226]
+            - generic [ref=e228]:
+              - heading "Contabilidad" [level=3] [ref=e229]
+              - paragraph [ref=e230]: Reportes detallados
+          - link "Usuarios Gestionar equipo" [ref=e231] [cursor=pointer]:
+            - /url: /admin/usuarios
+            - img [ref=e233]
+            - generic [ref=e238]:
+              - heading "Usuarios" [level=3] [ref=e239]
+              - paragraph [ref=e240]: Gestionar equipo
+  - text: "2"
+  - generic [ref=e241]: "0"

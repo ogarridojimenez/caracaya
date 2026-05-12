@@ -1,0 +1,4 @@
+- generic [active] [ref=e2]:
+  - alert [ref=e1]
+  - paragraph [ref=e28]: Cargando...
+  - text: "2"

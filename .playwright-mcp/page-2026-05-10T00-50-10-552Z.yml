@@ -1,0 +1,26 @@
+- generic [active] [ref=e2]:
+  - alert [ref=e1]
+  - generic [ref=e29]:
+    - generic [ref=e30]:
+      - img [ref=e32]
+      - heading "Crear cuenta" [level=1] [ref=e35]
+      - paragraph [ref=e36]: Regístrate en Coffee App
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - img [ref=e39]
+        - textbox "Nombre completo" [ref=e42]: Test Cliente Nuevo
+      - generic [ref=e43]:
+        - img [ref=e44]
+        - textbox "Correo electrónico" [ref=e47]: testnuevo456@ejemplo.com
+      - generic [ref=e48]:
+        - img [ref=e49]
+        - textbox "Contraseña" [ref=e52]: Admin123!
+      - generic [ref=e53]:
+        - img [ref=e54]
+        - textbox "Confirmar contraseña" [ref=e57]: Admin123!
+      - button "Creando cuenta..." [disabled] [ref=e62]
+    - paragraph [ref=e59]:
+      - text: ¿Ya tienes cuenta?
+      - link "Inicia sesión" [ref=e60] [cursor=pointer]:
+        - /url: /login
+  - text: "42"
