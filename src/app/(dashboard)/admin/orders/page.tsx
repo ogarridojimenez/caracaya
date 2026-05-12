@@ -41,10 +41,10 @@ export default function AdminOrdersPage() {
 
   const ordersByStatus = {
     pending: orders?.filter(o => o.status === 'pending').length ?? 0,
-    confirmed: orders?.filter(o => o.status === 'confirmed').length ?? 0,
+    confirmed: orders?.filter(o => o.status === 'confirmed').length ?? 0,  
     preparing: orders?.filter(o => o.status === 'preparing').length ?? 0,
     ready: orders?.filter(o => o.status === 'ready').length ?? 0,
-    completed: orders?.filter(o => o.status === 'completed').length ?? 0,
+    completed: orders?.filter(o => o.status === 'completed').length ?? 0,  
     cancelled: orders?.filter(o => o.status === 'cancelled').length ?? 0,
   };
 
