@@ -1,0 +1,71 @@
+name: Notify Telegram on Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify deploy started
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+          -d parse_mode="Markdown" \
+          -d text="🔄 *Deploy iniciado*%0A📦 ${{ github.repository }}%0A👤 ${{ github.actor }}%0A📝 ${{ github.event.head_commit.message }}"
+
+      - name: Wait for Vercel and notify result
+        run: |
+          echo "Esperando a Vercel..."
+          sleep 20
+
+          for i in 1 2 3 4 5 6; do
+            RESPONSE=$(curl -s "https://api.vercel.com/v6/deployments?projectId=${{ secrets.VERCEL_PROJECT_ID }}&limit=1" \
+              -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}")
+
+            STATE=$(echo $RESPONSE | python3 -c "import sys,json; d=json.load(sys.stdin)['deployments'][0]; print(d['state'])")
+            URL=$(echo $RESPONSE | python3 -c "import sys,json; d=json.load(sys.stdin)['deployments'][0]; print(d.get('url','sin url'))")
+            DEPLOY_ID=$(echo $RESPONSE | python3 -c "import sys,json; d=json.load(sys.stdin)['deployments'][0]; print(d['uid'])")
+
+            echo "Intento $i - Estado: $STATE - ID: $DEPLOY_ID"
+
+            if [ "$STATE" = "READY" ] || [ "$STATE" = "ERROR" ]; then
+
+              LOGS=$(curl -s "https://api.vercel.com/v2/deployments/${DEPLOY_ID}/events" \
+                -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | \
+                python3 -c "
+          import sys, json
+          lines = []
+          events = json.load(sys.stdin)
+          for e in events:
+              text = e.get('payload', {}).get('text', '').strip()
+              if text:
+                  lines.append(text)
+          result = lines[-15:] if len(lines) > 15 else lines
+          print('%0A'.join(result)) if result else print('Sin logs disponibles')
+                ")
+
+              if [ "$STATE" = "READY" ]; then
+                curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+                -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+                -d parse_mode="Markdown" \
+                -d text="✅ *Deploy exitoso*%0A🌐 https://${URL}%0A📦 ${{ github.repository }}%0A%0A📋 *Logs:*%0A\`\`\`%0A${LOGS}%0A\`\`\`"
+              else
+                curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+                -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+                -d parse_mode="Markdown" \
+                -d text="❌ *Deploy falló*%0A📦 ${{ github.repository }}%0A%0A📋 *Logs:*%0A\`\`\`%0A${LOGS}%0A\`\`\`"
+              fi
+              exit 0
+            fi
+
+            echo "Estado $STATE, esperando 20 segundos más..."
+            sleep 20
+          done
+
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+          -d parse_mode="Markdown" \
+          -d text="⚠️ *Timeout*%0ANo se pudo confirmar el estado del deploy%0A📦 ${{ github.repository }}"
