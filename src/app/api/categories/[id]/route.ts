@@ -1,11 +1,14 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth } from '@/lib/auth/helpers';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request);
+  if ('error' in auth) return auth.error;
+
+  const { supabase } = auth.success;
 
   const { data, error } = await supabase
     .from('categories')
@@ -21,23 +24,10 @@ export async function GET(
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request, ['manager_admin']);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: userData } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (userData?.role !== 'manager_admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
+  const { supabase } = auth.success;
   const body = await request.json();
 
   const { data, error } = await supabase
@@ -58,22 +48,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request, ['manager_admin']);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: userData } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (userData?.role !== 'manager_admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const { supabase } = auth.success;
 
   const { error } = await supabase
     .from('categories')

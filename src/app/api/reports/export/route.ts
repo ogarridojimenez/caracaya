@@ -1,23 +1,11 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth } from '@/lib/auth/helpers';
 
 export async function GET(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request, ['manager_admin', 'vendedor']);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: userData } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (userData?.role !== 'manager_admin' && userData?.role !== 'vendedor') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const { supabase } = auth.success;
 
   const { searchParams } = new URL(request.url);
   const startDate = searchParams.get('start_date') || new Date(new Date().setDate(1)).toISOString().split('T')[0];
@@ -41,7 +29,7 @@ export async function GET(request: NextRequest) {
       date.toLocaleDateString('es-ES'),
       date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
       order.order_number,
-      (order.user as any)?.full_name || 'Cliente',
+      (order.user as { full_name?: string })?.full_name || 'Cliente',
       order.status,
       order.subtotal?.toFixed(2) || '0.00',
       order.tax_amount?.toFixed(2) || '0.00',

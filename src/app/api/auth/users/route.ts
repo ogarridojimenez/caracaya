@@ -1,23 +1,11 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth } from '@/lib/auth/helpers';
 
 export async function GET(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request, ['manager_admin']);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: currentUser } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (currentUser?.role !== 'manager_admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const { supabase } = auth.success;
 
   const { data, error } = await supabase
     .from('users')
@@ -32,22 +20,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request, ['manager_admin']);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: currentUser } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (currentUser?.role !== 'manager_admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const { supabase } = auth.success;
 
   const { email, password, name, role = 'cliente' } = await request.json();
 
@@ -59,71 +35,8 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-
-  return NextResponse.json({ data }, { status: 201 });
-}
-
-export async function PATCH(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: currentUser } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (currentUser?.role !== 'manager_admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  const body = await request.json();
-  const { userId, role } = body;
-
-  const { data, error } = await supabase
-    .from('users')
-    .update({ role })
-    .eq('id', userId)
-    .select()
-    .single();
-
-  if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
   return NextResponse.json({ data });
-}
-
-export async function DELETE(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: currentUser } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (currentUser?.role !== 'manager_admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  const { id } = await request.json();
-  const { error } = await supabase.auth.admin.deleteUser(id);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-
-  return NextResponse.json({ success: true });
 }

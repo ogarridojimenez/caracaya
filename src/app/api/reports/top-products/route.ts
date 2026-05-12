@@ -1,23 +1,25 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth } from '@/lib/auth/helpers';
+
+interface TopProduct {
+  name: string;
+  quantity: number;
+  revenue: number;
+}
+
+interface OrderItem {
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  orders?: { status: string } | { status: string }[];
+}
 
 export async function GET(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request, ['manager_admin', 'vendedor']);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: userData } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (userData?.role !== 'manager_admin' && userData?.role !== 'vendedor') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const { supabase } = auth.success;
 
   const { searchParams } = new URL(request.url);
   const startDate = searchParams.get('start_date');
@@ -26,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('order_items')
-    .select('product_name, quantity, unit_price, total_price, orders(status, created_at)')
+    .select('product_name, quantity, unit_price, total_price, created_at, orders(status, created_at)')
     .order('quantity', { ascending: false });
 
   if (startDate) {
@@ -42,12 +44,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const filteredItems = items?.filter((item: any) => {
-    const order = item.orders as any;
-    return order?.status === 'completed';
+  const filteredItems = items?.filter((item: OrderItem) => {
+    const orders = item.orders;
+    if (Array.isArray(orders)) {
+      return orders.some(o => o.status === 'completed');
+    }
+    return orders?.status === 'completed';
   }) || [];
 
-  const productStats = filteredItems.reduce((acc: any, item: any) => {
+  const productStats = filteredItems.reduce<Record<string, TopProduct>>((acc, item: OrderItem) => {
     const name = item.product_name;
     if (!acc[name]) {
       acc[name] = { name, quantity: 0, revenue: 0 };
@@ -58,7 +63,7 @@ export async function GET(request: NextRequest) {
   }, {});
 
   const topProducts = Object.values(productStats)
-    .sort((a: any, b: any) => b.quantity - a.quantity)
+    .sort((a, b) => b.quantity - a.quantity)
     .slice(0, limit);
 
   return NextResponse.json({ data: topProducts });

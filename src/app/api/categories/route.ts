@@ -1,32 +1,23 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth, isAdmin } from '@/lib/auth/helpers';
 
 export async function GET(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: userData } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  const isAdmin = userData?.role === 'manager_admin';
+  const { supabase, role } = auth.success;
+  const adminMode = isAdmin(role);
 
   const { data, error } = await supabase
     .from('categories')
     .select('*')
-    .order(isAdmin ? 'sort_order' : 'name');
+    .order(adminMode ? 'sort_order' : 'name');
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  if (!isAdmin) {
+  if (!adminMode) {
     return NextResponse.json({ data: data?.filter(c => c.is_active) ?? [] });
   }
 
@@ -34,23 +25,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request, ['manager_admin']);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: userData } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (userData?.role !== 'manager_admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
+  const { supabase } = auth.success;
   const body = await request.json();
 
   const { data, error } = await supabase

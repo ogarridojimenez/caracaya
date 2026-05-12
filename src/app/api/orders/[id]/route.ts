@@ -1,12 +1,28 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { OrderStatus } from '@/domain/types/database';
+
+interface Order {
+  user_id: string | null;
+  status: OrderStatus;
+  completed_at?: string;
+}
+
+interface UpdateBody {
+  status: OrderStatus;
+}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const supabase = createServerSupabaseClient();
-  
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { data, error } = await supabase
     .from('orders')
     .select('*, items:order_items(*, product:products(*)), user:users(*)')
@@ -25,7 +41,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   const supabase = createServerSupabaseClient();
-  
+
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -47,12 +63,12 @@ export async function PATCH(
     return NextResponse.json({ error: 'Order not found' }, { status: 404 });
   }
 
-  const body = await request.json();
+  const body: UpdateBody = await request.json();
   const { status } = body;
-  
+
   const isStaff = userData?.role === 'vendedor' || userData?.role === 'manager_admin';
   const isOwner = order.user_id === user.id;
-  
+
   if (status === 'cancelled' && !isStaff) {
     if (!isOwner) {
       return NextResponse.json({ error: 'No puedes cancelar este pedido' }, { status: 403 });
@@ -61,9 +77,9 @@ export async function PATCH(
       return NextResponse.json({ error: 'Solo se pueden cancelar pedidos pendientes' }, { status: 400 });
     }
   }
-  
-  const updates: any = { status };
-  
+
+  const updates: Partial<Order> = { status };
+
   if (status === 'completed') {
     updates.completed_at = new Date().toISOString();
   }

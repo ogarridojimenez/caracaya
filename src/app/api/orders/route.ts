@@ -1,6 +1,33 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
+interface OrderItemInput {
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  notes?: string;
+}
+
+interface CreateOrderBody {
+  items: OrderItemInput[];
+  pickupTime?: string;
+  notes?: string;
+  subtotal: number;
+  taxAmount?: number;
+  discountAmount?: number;
+}
+
+interface OrderItemRow {
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  notes: string | null;
+  order_id: string;
+}
+
 export async function GET(request: NextRequest) {
   const supabase = createServerSupabaseClient();
 
@@ -39,14 +66,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
+    const body: CreateOrderBody = await request.json();
     const { items, pickupTime, notes, subtotal, taxAmount, discountAmount } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Se requiere al menos un producto' }, { status: 400 });
     }
 
-    const orderItems = items.map((item: any) => ({
+    const orderItems: Omit<OrderItemRow, 'order_id'>[] = items.map((item: OrderItemInput) => ({
       product_id: item.productId,
       product_name: item.productName,
       quantity: item.quantity,
@@ -73,9 +100,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: orderError.message }, { status: 500 });
     }
 
+    const itemsToInsert: OrderItemRow[] = orderItems.map(item => ({ ...item, order_id: order.id }));
+
     const { error: itemsError } = await supabase
       .from('order_items')
-      .insert(orderItems.map((item: any) => ({ ...item, order_id: order.id })));
+      .insert(itemsToInsert);
 
     if (itemsError) {
       await supabase.from('orders').delete().eq('id', order.id);

@@ -1,30 +1,37 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth } from '@/lib/auth/helpers';
+
+interface DailyCloseItem {
+  total_price: number;
+}
+
+interface DailyClose {
+  close_date: string;
+  daily_close_items?: DailyCloseItem[];
+  [key: string]: unknown;
+}
+
+interface Order {
+  created_at?: string;
+  total?: number;
+  [key: string]: unknown;
+}
+
+interface CloseWithTotals extends DailyClose {
+  orders_total: number;
+  manual_total: number;
+  grand_total: number;
+}
 
 export async function GET(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request, ['manager_admin', 'vendedor']);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: userData } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!userData || !['vendedor', 'manager_admin'].includes(userData.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const { supabase } = auth.success;
 
   const { data: closes, error } = await supabase
     .from('daily_closes')
-    .select(`
-      *,
-      daily_close_items (*)
-    `)
+    .select('*, daily_close_items(*)')
     .order('close_date', { ascending: false });
 
   if (error) {
@@ -33,7 +40,7 @@ export async function GET(request: NextRequest) {
 
   const { data: orders, error: ordersError } = await supabase
     .from('orders')
-    .select('*')
+    .select('created_at, total')
     .eq('status', 'completed')
     .order('created_at', { ascending: false });
 
@@ -41,10 +48,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: ordersError.message }, { status: 500 });
   }
 
-  const closesWithTotals = closes.map(close => {
+  const closesWithTotals: CloseWithTotals[] = closes.map((close: DailyClose) => {
     const closeDateStr = String(close.close_date);
 
-    const dayOrders = (orders ?? []).filter(o => {
+    const dayOrders = (orders ?? []).filter((o: Order) => {
       if (!o.created_at) return false;
       const od = new Date(o.created_at);
       const oy = od.getFullYear();
@@ -53,10 +60,11 @@ export async function GET(request: NextRequest) {
       return `${oy}-${om}-${od2}` === closeDateStr;
     });
 
-    const ordersTotal = dayOrders.reduce((sum: number, o: any) => sum + (o.total || 0), 0);
+    const ordersTotal = dayOrders.reduce((sum: number, o: Order) => sum + (o.total || 0), 0);
 
     const manualTotal = (close.daily_close_items ?? []).reduce(
-      (sum: number, item: any) => sum + (item.total_price || 0), 0
+      (sum: number, item: DailyCloseItem) => sum + (item.total_price || 0),
+      0
     );
 
     return {

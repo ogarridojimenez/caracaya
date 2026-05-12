@@ -2,12 +2,20 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Product, Order } from '@/domain/types/database';
+import type { Product } from '@/domain/types/database';
 
 export interface CartItem {
   product: Product;
   quantity: number;
   notes?: string;
+}
+
+interface OrderItemForReorder {
+  product_id: string;
+  product_name: string;
+  unit_price: number;
+  quantity: number;
+  product?: { image_url: string | null };
 }
 
 interface CartStore {
@@ -23,7 +31,7 @@ interface CartStore {
   setNotes: (notes: string) => void;
   getTotal: () => number;
   getItemCount: () => number;
-  loadFromOrder: (items: any[]) => void;
+  loadFromOrder: (items: OrderItemForReorder[]) => void;
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
 }
@@ -89,13 +97,13 @@ export const useCartStore = create<CartStore>()(
         return get().items.reduce((count, item) => count + item.quantity, 0);
       },
       
-      loadFromOrder: (items: any[]) => {
+      loadFromOrder: (items: OrderItemForReorder[]) => {
         const cartItems: CartItem[] = items.map(item => ({
           product: {
             id: item.product_id,
             name: item.product_name,
             price: item.unit_price,
-            image_url: item.product?.image_url,
+            image_url: item.product?.image_url ?? null,
           } as Product,
           quantity: item.quantity,
         }));
