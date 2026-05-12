@@ -31,7 +31,7 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const filteredOrders = orders?.filter((order) => {
+  const filteredOrders = orders?.filter((order: any) => {
     const matchesSearch =
       order.order_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
