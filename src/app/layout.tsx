@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { LayoutProviders } from './layout-providers';
@@ -9,13 +9,18 @@ export const metadata: Metadata = {
   title: 'Caracaya - Dulces, Refrescos y Comida',
   description: 'Sistema de pedidos para dulces, refrescos y comida',
   manifest: '/manifest.json',
-  themeColor: '#D97706',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Caracaya',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#D97706',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
