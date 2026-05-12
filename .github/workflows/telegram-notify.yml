@@ -3,7 +3,7 @@ name: Notify Telegram on Deploy
 on:
   push:
     branches:
-      - main
+      - main 
 
 jobs:
   notify:
