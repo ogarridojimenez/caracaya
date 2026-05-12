@@ -5,6 +5,7 @@ import { useProducts } from '@/features/products/hooks';
 import { AddToCartButton } from '@/features/orders/components';
 import { ShoppingBag, Search } from 'lucide-react';
 import { useCartStore } from '@/store';
+import type { Product } from '@/domain/types/database';
 
 export default function CarritoPage() {
   const [mounted, setMounted] = useState(false);
@@ -17,7 +18,7 @@ export default function CarritoPage() {
   }, []);
 
   const products = data ?? [];
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = products.filter((p: Product) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
     return matchesSearch && p.is_available;
   });
@@ -82,7 +83,7 @@ export default function CarritoPage() {
           <div className="text-center py-12 text-gray-500">No se encontraron productos</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product: Product) => (
               <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
                 {product.image_url ? (
                   <img

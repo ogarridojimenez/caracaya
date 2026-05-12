@@ -75,7 +75,7 @@ export function ProductsTable() {
               </tr>
             </thead>
             <tbody>
-              {data?.map((product) => (
+              {data?.map((product: Product) => (
                 <tr key={product.id} className="border-b hover:bg-gray-50">
                   <td className="p-3">{product.name}</td>
                   <td className="p-3">${product.price.toFixed(2)}</td>

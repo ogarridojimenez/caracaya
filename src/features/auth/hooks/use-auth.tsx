@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const result = await authApi.login(email, password);
       if (result.user) {
-        const role = result.user.role;
+        const role = result.user.role as UserRole;
         router.push(roleRoutes[role] ?? '/carrito');
       }
       return { error: null };
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const result = await authApi.register(email, password, fullName);
       if (result.user) {
-        const role = result.user.role ?? 'cliente';
+        const role = (result.user.role ?? 'cliente') as UserRole;
         router.push(roleRoutes[role] ?? '/carrito');
       }
       return { error: null };

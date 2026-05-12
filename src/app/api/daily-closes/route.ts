@@ -53,10 +53,10 @@ export async function GET(request: NextRequest) {
       return `${oy}-${om}-${od2}` === closeDateStr;
     });
 
-    const ordersTotal = dayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const ordersTotal = dayOrders.reduce((sum: number, o: any) => sum + (o.total || 0), 0);
 
     const manualTotal = (close.daily_close_items ?? []).reduce(
-      (sum, item) => sum + (item.total_price || 0), 0
+      (sum: number, item: any) => sum + (item.total_price || 0), 0
     );
 
     return {

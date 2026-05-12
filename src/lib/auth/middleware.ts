@@ -1,30 +1,30 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 
 const PUBLIC_ROUTES = ['/login', '/register', '/'];
 const MANAGER_ROUTES = ['/admin'];
-const PROTECTED_ROUTES = ['/pedidos'];
+const PROTECTED_ROUTES = ['/pedidos', '/carrito', '/vendedor', '/contabilidad'];
 
 export async function updateSession(request: NextRequest) {
-  let supabase = createServerClient(
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
+        getAll() {
+          return request.cookies.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set(name, value);
-          const response = NextResponse.next();
-          response.cookies.set(name, value, options);
-          return response;
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set(name, '');
-          const response = NextResponse.next();
-          response.cookies.set(name, '', options);
-          return response;
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
         },
       },
     }
@@ -59,5 +59,5 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return response;
 }

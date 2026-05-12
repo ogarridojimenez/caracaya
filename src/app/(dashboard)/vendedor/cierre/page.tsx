@@ -5,6 +5,7 @@ import { useAuth } from '@/features/auth/hooks';
 import { useProducts } from '@/features/products/hooks';
 import { DollarSign, Plus, Trash2, Save, Calendar, Package, Check, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
+import type { Product } from '@/domain/types/database';
 
 interface CloseItem {
   product_name: string;
@@ -73,7 +74,7 @@ export default function CierreCajaPage() {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     if (field === 'productName') {
-      const product = products?.find(p => p.name === value);
+      const product = products?.find((p: Product) => p.name === value);
       if (product) { newItems[index].unitPrice = product.price; }
     }
     setItems(newItems);
@@ -177,7 +178,7 @@ export default function CierreCajaPage() {
                         onChange={(e) => updateItem(index, 'productName', e.target.value)}
                         placeholder="Nombre del producto" className="w-full px-3 py-2 border rounded-lg text-sm" />
                       <datalist id={`products_${index}`}>
-                        {products?.map((p) => (<option key={p.id} value={p.name} />))}
+                        {products?.map((p: Product) => (<option key={p.id} value={p.name} />))}
                       </datalist>
                     </div>
                     <div className="col-span-2">

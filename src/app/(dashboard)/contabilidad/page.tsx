@@ -166,7 +166,7 @@ export default function ContabilidadPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(v: number) => `$${v.toFixed(2)}`} />
+                  <Tooltip formatter={(v) => `${Number(v).toFixed(2)}`} />
                   <Bar dataKey="manual" name="Mostrador" fill="#f59e0b" stackId="a" />
                   <Bar dataKey="online" name="Online" fill="#3b82f6" stackId="a" />
                 </BarChart>
@@ -180,7 +180,7 @@ export default function ContabilidadPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
-                      <Tooltip formatter={(v: number) => `$${v.toFixed(2)}`} />
+                      <Tooltip formatter={(v) => `${Number(v).toFixed(2)}`} />
                       <Line type="monotone" dataKey="cierre" stroke="#f59e0b" strokeWidth={2} name="Cierres" />
                       <Line type="monotone" dataKey="pedidos" stroke="#3b82f6" strokeWidth={2} name="Pedidos" />
                     </LineChart>

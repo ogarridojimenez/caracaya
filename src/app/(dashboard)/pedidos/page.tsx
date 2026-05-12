@@ -108,7 +108,7 @@ function OrderCard({ order, isStaffUser, onStatusChange, isUpdating }: OrderCard
 
       <div className="flex items-center justify-between mt-2 pt-2 border-t">
         <span className="text-sm font-semibold text-amber-600">${order.total.toFixed(2)}</span>
-        {nextStatusLabel && isStaffUser && (
+        {nextStatusLabel && isStaffUser && nextStatus && (
           <button
             onClick={() => onStatusChange(order.id, nextStatus)}
             disabled={isUpdating}

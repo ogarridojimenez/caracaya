@@ -5,7 +5,7 @@ import { useCategories, useCreateProduct, useUpdateProduct } from '../hooks';
 import * as productsApi from '@/lib/api/products';
 import toast from 'react-hot-toast';
 import { X } from 'lucide-react';
-import type { Product } from '@/domain/types/database';
+import type { Product, Category } from '@/domain/types/database';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -145,7 +145,7 @@ export function ProductFormModal({ isOpen, onClose, product }: ProductFormModalP
             <label className="block text-sm font-medium">Categoría *</label>
             <select name="category_id" value={formData.category_id} onChange={handleChange} className="w-full border rounded px-3 py-2" required>
               <option value="">Seleccionar...</option>
-              {categories?.map(cat => (
+              {categories?.map((cat: Category) => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>

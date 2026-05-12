@@ -34,7 +34,7 @@ const navItemsByRole: Record<UserRole, NavItem[]> = {
   ],
 };
 
-export default function DashboardLayout({ children }: { children }) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <CartDrawer />

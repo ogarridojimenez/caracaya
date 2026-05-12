@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       date.toLocaleDateString('es-ES'),
       date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
       order.order_number,
-      order.user?.full_name || 'Cliente',
+      (order.user as any)?.full_name || 'Cliente',
       order.status,
       order.subtotal?.toFixed(2) || '0.00',
       order.tax_amount?.toFixed(2) || '0.00',
