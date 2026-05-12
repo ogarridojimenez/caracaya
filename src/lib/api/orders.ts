@@ -28,7 +28,7 @@ export interface CreateOrderInput {
   discountAmount?: number;
 }
 
-export async function getOrders(userId?: string) {
+export async function getOrders(userId?: string): Promise<any[]> {
   const params = userId ? `?userId=${userId}` : '';
   const response = await fetchAPI(`/orders${params}`);
   return response.data ?? [];
