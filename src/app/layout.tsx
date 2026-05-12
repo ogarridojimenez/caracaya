@@ -6,8 +6,16 @@ import { LayoutProviders } from './layout-providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Coffee App',
-  description: 'Sistema de gestión para cafetería',
+  title: 'Caracaya - Dulces, Refrescos y Comida',
+  description: 'Sistema de pedidos para dulces, refrescos y comida',
+  manifest: '/manifest.json',
+  themeColor: '#D97706',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Caracaya',
+  },
 };
 
 export default function RootLayout({

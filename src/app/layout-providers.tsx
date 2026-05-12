@@ -35,6 +35,9 @@ export function LayoutProviders({ children }: LayoutProvidersProps) {
 
   useEffect(() => {
     setMounted(true);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    }
   }, []);
 
   const queryClient = getQueryClient();

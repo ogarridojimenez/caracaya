@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useProducts, useCategories } from '../hooks';
 import { ProductFormModal } from './ProductFormModal';
 import { confirmService } from '@/components/ui/molecules';
+import { Skeleton } from '@/components/ui/skeleton';
 import toast from 'react-hot-toast';
 import { useDeleteProduct } from '../hooks';
 import type { Product } from '@/domain/types/database';
@@ -59,7 +60,11 @@ export function ProductsTable() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8">Cargando...</div>
+        <div className="space-y-4">
+          {[1,2,3,4,5].map(i => (
+            <div key={i} className="h-12 bg-gray-200 rounded animate-pulse" />
+          ))}
+        </div>
       ) : data?.length === 0 ? (
         <div className="text-center py-8 text-gray-500">No hay productos</div>
       ) : (
