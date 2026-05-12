@@ -1,10 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr';
 
 const PUBLIC_ROUTES = ['/', '/login', '/register'];
 const ADMIN_ROUTES = ['/admin'];
 const STAFF_ROUTES = ['/pedidos', '/vendedor', '/contabilidad'];
-const USER_ROUTES = ['/carrito', '/perfil', '/usuarios'];
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -13,14 +12,41 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const supabase = createServerSupabaseClient();
+  const response = NextResponse.next({
+    request: { headers: request.headers },
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          const cookies = parseCookieHeader(request.headers.get('Cookie') ?? '');
+          return cookies.map(c => ({ name: c.name, value: c.value ?? '' }));
+        },
+        setAll(cookiesToSet, headers) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            });
+          });
+          if (headers) {
+            Object.entries(headers).forEach(([key, value]) => {
+              response.headers.set(key, value);
+            });
+          }
+        },
+      },
+    }
+  );
+
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    if (!PUBLIC_ROUTES.includes(pathname)) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-    return NextResponse.next();
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   const { data: userProfile } = await supabase
@@ -34,23 +60,14 @@ export async function middleware(request: NextRequest) {
   const isStaff = role === 'vendedor' || isManager;
 
   if (pathname.startsWith('/admin') && !isManager) {
-    return NextResponse.redirect(new URL(redirectForRole(role), request.url));
+    return NextResponse.redirect(new URL('/vendedor', request.url));
   }
 
   if (STAFF_ROUTES.some(r => pathname.startsWith(r)) && !isStaff) {
-    return NextResponse.redirect(new URL(redirectForRole(role), request.url));
+    return NextResponse.redirect(new URL('/carrito', request.url));
   }
 
-  return NextResponse.next();
-}
-
-function redirectForRole(role: string): string {
-  const routes: Record<string, string> = {
-    cliente: '/carrito',
-    vendedor: '/vendedor',
-    manager_admin: '/admin',
-  };
-  return routes[role] ?? '/';
+  return response;
 }
 
 export const config = {
