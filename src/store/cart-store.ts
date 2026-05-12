@@ -23,6 +23,7 @@ interface CartStore {
   setNotes: (notes: string) => void;
   getTotal: () => number;
   getItemCount: () => number;
+  loadFromOrder: (items: any[]) => void;
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
 }
@@ -87,9 +88,22 @@ export const useCartStore = create<CartStore>()(
       getItemCount: () => {
         return get().items.reduce((count, item) => count + item.quantity, 0);
       },
+      
+      loadFromOrder: (items: any[]) => {
+        const cartItems: CartItem[] = items.map(item => ({
+          product: {
+            id: item.product_id,
+            name: item.product_name,
+            price: item.unit_price,
+            image_url: item.product?.image_url,
+          } as Product,
+          quantity: item.quantity,
+        }));
+        set({ items: cartItems, pickupTime: '', notes: '' });
+      },
     }),
     {
-      name: 'coffee-cart',
+      name: 'caracaya-cart',
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

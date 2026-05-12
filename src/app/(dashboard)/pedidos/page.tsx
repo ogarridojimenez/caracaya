@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks';
 import { useOrders, useUpdateOrderStatus } from '@/features/orders/hooks';
-import { Clock, Check, X, AlertCircle, Users, Package, Search, ChevronRight, Bell, Volume2, VolumeX, LayoutGrid, List } from 'lucide-react';
+import { Clock, Check, X, AlertCircle, Users, Package, Search, ChevronRight, Bell, Volume2, VolumeX, LayoutGrid, List, RotateCcw, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { OrderStatus } from '@/domain/types/database';
+import { useCartStore } from '@/store';
 
 const KANBAN_STATUSES: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'ready', 'completed'];
 
@@ -63,15 +65,18 @@ function OrderTimer({ createdAt }: OrderTimerProps) {
 interface OrderCardProps {
   order: any;
   isStaffUser: boolean;
+  isClientOwner: boolean;
   onStatusChange: (orderId: string, status: OrderStatus) => void;
+  onReorder: (items: any[]) => void;
   isUpdating: boolean;
 }
 
-function OrderCard({ order, isStaffUser, onStatusChange, isUpdating }: OrderCardProps) {
+function OrderCard({ order, isStaffUser, isClientOwner, onStatusChange, onReorder, isUpdating }: OrderCardProps) {
   const status = statusConfig[order.status as OrderStatus];
   const nextStatus = nextStatusMap[order.status as OrderStatus];
   const nextStatusLabel = nextStatus ? statusConfig[nextStatus].label : null;
   const items = order.items || order.order_items || [];
+  const canCancel = isClientOwner && order.status === 'pending';
 
   return (
     <div className={`bg-white rounded-lg border ${status.borderColor} shadow-sm hover:shadow-md transition-shadow p-3`}>
@@ -108,16 +113,37 @@ function OrderCard({ order, isStaffUser, onStatusChange, isUpdating }: OrderCard
 
       <div className="flex items-center justify-between mt-2 pt-2 border-t">
         <span className="text-sm font-semibold text-amber-600">${order.total.toFixed(2)}</span>
-        {nextStatusLabel && isStaffUser && nextStatus && (
-          <button
-            onClick={() => onStatusChange(order.id, nextStatus)}
-            disabled={isUpdating}
-            className="px-2 py-1 bg-amber-600 text-white text-xs rounded font-medium hover:bg-amber-700 disabled:opacity-50 flex items-center gap-1"
-          >
-            <ChevronRight className="h-3 w-3" />
-            {nextStatusLabel}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {(canCancel || !isStaffUser) && (
+            <button
+              onClick={() => onStatusChange(order.id, 'cancelled')}
+              disabled={isUpdating || (canCancel && order.status !== 'pending')}
+              className="p-1.5 text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
+              title="Cancelar pedido"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+          {!isStaffUser && (
+            <button
+              onClick={() => onReorder(items)}
+              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded"
+              title="Repetir pedido"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
+          )}
+          {nextStatusLabel && isStaffUser && nextStatus && (
+            <button
+              onClick={() => onStatusChange(order.id, nextStatus)}
+              disabled={isUpdating}
+              className="px-2 py-1 bg-amber-600 text-white text-xs rounded font-medium hover:bg-amber-700 disabled:opacity-50 flex items-center gap-1"
+            >
+              <ChevronRight className="h-3 w-3" />
+              {nextStatusLabel}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -128,12 +154,15 @@ const notificationSound = typeof window !== 'undefined' ? new Audio('data:audio/
 export default function PedidosPage() {
   const { user } = useAuth();
   const isStaffUser = user ? isStaff(user.role) : false;
+  const isClientOwner = (orderUserId: string) => user?.id === orderUserId;
 
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [searchQuery, setSearchQuery] = useState('');
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const prevOrdersRef = useRef<string[]>([]);
+  const router = useRouter();
+  const loadFromOrder = useCartStore(state => state.loadFromOrder);
 
   const { data: orders, isLoading, error } = useOrders(isStaffUser ? undefined : user?.id);
   const updateStatus = useUpdateOrderStatus();
@@ -168,6 +197,12 @@ export default function PedidosPage() {
     } catch {
       toast.error('Error al actualizar el pedido');
     }
+  };
+
+  const handleReorder = (items: any[]) => {
+    loadFromOrder(items);
+    toast.success('Productos agregados al carrito');
+    router.push('/');
   };
 
   const filteredOrders = orders?.filter((order) => {
@@ -307,7 +342,9 @@ export default function PedidosPage() {
                           key={order.id}
                           order={order}
                           isStaffUser={isStaffUser}
+                          isClientOwner={isClientOwner(order.user_id)}
                           onStatusChange={handleStatusChange}
+                          onReorder={handleReorder}
                           isUpdating={updateStatus.isPending}
                         />
                       ))
@@ -325,6 +362,8 @@ export default function PedidosPage() {
             const StatusIcon = status.icon;
             const canAdvance = isStaffUser && nextStatusMap[order.status as OrderStatus] !== null;
             const items = order.items || order.order_items || [];
+            const isOwner = isClientOwner(order.user_id);
+            const canCancel = isOwner && order.status === 'pending';
 
             return (
               <div key={order.id} className="bg-white rounded-xl shadow overflow-hidden">
@@ -382,18 +421,37 @@ export default function PedidosPage() {
                   )}
                 </div>
 
-                {canAdvance && (
-                  <div className="px-4 pb-4">
+                <div className="px-4 pb-4 flex gap-2">
+                  {canCancel && (
+                    <button
+                      onClick={() => handleStatusChange(order.id, 'cancelled')}
+                      disabled={updateStatus.isPending}
+                      className="flex-1 py-2 border border-red-300 text-red-600 rounded-lg font-medium hover:bg-red-50 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Cancelar
+                    </button>
+                  )}
+                  {!isStaffUser && (
+                    <button
+                      onClick={() => handleReorder(items)}
+                      className="flex-1 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 flex items-center justify-center gap-2"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      Repetir pedido
+                    </button>
+                  )}
+                  {canAdvance && (
                     <button
                       onClick={() => handleStatusChange(order.id, nextStatusMap[order.status as OrderStatus]!)}
                       disabled={updateStatus.isPending}
-                      className="w-full py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       <ChevronRight className="h-4 w-4" />
                       Marcar como {statusConfig[nextStatusMap[order.status as OrderStatus]!].label}
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             );
           })}
