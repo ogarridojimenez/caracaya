@@ -10,62 +10,168 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify deploy started
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-          -d parse_mode="Markdown" \
-          -d text="🔄 *Deploy iniciado*%0A📦 ${{ github.repository }}%0A👤 ${{ github.actor }}%0A📝 ${{ github.event.head_commit.message }}"
+          python3 << 'EOF'
+          import urllib.request, json, os
+
+          token = os.environ['BOT_TOKEN']
+          chat_id = os.environ['CHAT_ID']
+
+          text = (
+            "🔄 <b>DEPLOY INICIADO</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            f"📦 <b>Proyecto:</b> <code>{os.environ['REPO']}</code>\n"
+            f"👤 <b>Autor:</b> {os.environ['ACTOR']}\n"
+            f"📝 <b>Commit:</b> {os.environ['COMMIT_MSG']}\n"
+            "━━━━━━━━━━━━━━━━━━━━━"
+          )
+
+          data = json.dumps({
+            'chat_id': chat_id,
+            'text': text,
+            'parse_mode': 'HTML',
+            'disable_notification': True
+          }).encode()
+
+          req = urllib.request.Request(
+            f'https://api.telegram.org/bot{token}/sendMessage',
+            data=data,
+            headers={'Content-Type': 'application/json'}
+          )
+          urllib.request.urlopen(req)
+          EOF
 
       - name: Wait for Vercel and notify result
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPO: ${{ github.repository }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          echo "Esperando a Vercel..."
-          sleep 20
+          python3 << 'EOF'
+          import urllib.request, json, os, time
 
-          for i in 1 2 3 4 5 6; do
-            RESPONSE=$(curl -s "https://api.vercel.com/v6/deployments?projectId=${{ secrets.VERCEL_PROJECT_ID }}&limit=1" \
-              -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}")
+          token = os.environ['BOT_TOKEN']
+          chat_id = os.environ['CHAT_ID']
+          vercel_token = os.environ['VERCEL_TOKEN']
+          project_id = os.environ['PROJECT_ID']
+          repo = os.environ['REPO']
 
-            STATE=$(echo $RESPONSE | python3 -c "import sys,json; d=json.load(sys.stdin)['deployments'][0]; print(d['state'])")
-            URL=$(echo $RESPONSE | python3 -c "import sys,json; d=json.load(sys.stdin)['deployments'][0]; print(d.get('url','sin url'))")
-            DEPLOY_ID=$(echo $RESPONSE | python3 -c "import sys,json; d=json.load(sys.stdin)['deployments'][0]; print(d['uid'])")
+          def send_message(text, silent=False):
+            data = json.dumps({
+              'chat_id': chat_id,
+              'text': text,
+              'parse_mode': 'HTML',
+              'disable_notification': silent
+            }).encode()
+            req = urllib.request.Request(
+              f'https://api.telegram.org/bot{token}/sendMessage',
+              data=data,
+              headers={'Content-Type': 'application/json'}
+            )
+            urllib.request.urlopen(req)
 
-            echo "Intento $i - Estado: $STATE - ID: $DEPLOY_ID"
+          def get_deployments():
+            req = urllib.request.Request(
+              f'https://api.vercel.com/v6/deployments?projectId={project_id}&limit=1',
+              headers={'Authorization': f'Bearer {vercel_token}'}
+            )
+            res = urllib.request.urlopen(req)
+            return json.loads(res.read())
 
-            if [ "$STATE" = "READY" ] || [ "$STATE" = "ERROR" ]; then
+          def get_logs(deploy_id):
+            req = urllib.request.Request(
+              f'https://api.vercel.com/v2/deployments/{deploy_id}/events',
+              headers={'Authorization': f'Bearer {vercel_token}'}
+            )
+            res = urllib.request.urlopen(req)
+            events = json.loads(res.read())
 
-              LOGS=$(curl -s "https://api.vercel.com/v2/deployments/${DEPLOY_ID}/events" \
-                -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" | \
-                python3 -c "
-          import sys, json
-          lines = []
-          events = json.load(sys.stdin)
-          for e in events:
+            keep = ['cloning', 'running', 'installing', 'build completed',
+                    'deploying', 'deployment completed', 'error', 'warning',
+                    'failed', 'npm', 'yarn', 'vercel build']
+            skip = ['cache', 'machine configuration', 'vercel cli',
+                    'previous build', 'skipping', 'creating build']
+
+            lines = []
+            seen = set()
+            for e in events:
               text = e.get('payload', {}).get('text', '').strip()
-              if text:
-                  lines.append(text)
-          result = lines[-15:] if len(lines) > 15 else lines
-          print('%0A'.join(result)) if result else print('Sin logs disponibles')
-                ")
+              if not text or text in seen:
+                continue
+              seen.add(text)
+              tl = text.lower()
+              if any(k in tl for k in skip):
+                continue
+              if any(k in tl for k in keep):
+                lines.append(text)
+            return lines
 
-              if [ "$STATE" = "READY" ]; then
-                curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-                -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-                -d parse_mode="Markdown" \
-                -d text="✅ *Deploy exitoso*%0A🌐 https://${URL}%0A📦 ${{ github.repository }}%0A%0A📋 *Logs:*%0A\`\`\`%0A${LOGS}%0A\`\`\`"
-              else
-                curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-                -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-                -d parse_mode="Markdown" \
-                -d text="❌ *Deploy falló*%0A📦 ${{ github.repository }}%0A%0A📋 *Logs:*%0A\`\`\`%0A${LOGS}%0A\`\`\`"
-              fi
-              exit 0
-            fi
+          def fmt(line):
+            l = line.lower()
+            if 'error' in l or 'failed' in l:
+              return f'❌ {line}'
+            elif 'warning' in l:
+              return f'⚠️ {line}'
+            elif 'completed' in l or 'success' in l:
+              return f'✅ {line}'
+            elif any(k in l for k in ['installing','cloning','deploying','running']):
+              return f'▸ {line}'
+            else:
+              return f'• {line}'
 
-            echo "Estado $STATE, esperando 20 segundos más..."
-            sleep 20
-          done
+          print('Esperando 20s...')
+          time.sleep(20)
 
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-          -d parse_mode="Markdown" \
-          -d text="⚠️ *Timeout*%0ANo se pudo confirmar el estado del deploy%0A📦 ${{ github.repository }}"
+          state = url = deploy_id = None
+
+          for i in range(6):
+            d = get_deployments()['deployments'][0]
+            state = d['state']
+            url = d.get('url', '')
+            deploy_id = d['uid']
+            print(f'Intento {i+1} - Estado: {state}')
+            if state in ['READY', 'ERROR']:
+              break
+            print('Construyendo, esperando 20s más...')
+            time.sleep(20)
+
+          logs = get_logs(deploy_id)
+          log_text = '\n'.join(fmt(l) for l in logs)
+
+          if state == 'READY':
+            send_message((
+              "✅ <b>DEPLOY EXITOSO</b>\n"
+              "━━━━━━━━━━━━━━━━━━━━━\n"
+              f"📦 <b>Proyecto:</b> <code>{repo}</code>\n"
+              f"🌐 <b>URL:</b> <a href='https://{url}'>Ver deploy</a>\n"
+              "━━━━━━━━━━━━━━━━━━━━━\n"
+              "📋 <b>BUILD LOG</b>\n"
+              f"<pre>{log_text}</pre>"
+            ), silent=True)
+
+          elif state == 'ERROR':
+            send_message((
+              "❌ <b>DEPLOY FALLIDO</b>\n"
+              "━━━━━━━━━━━━━━━━━━━━━\n"
+              f"📦 <b>Proyecto:</b> <code>{repo}</code>\n"
+              "━━━━━━━━━━━━━━━━━━━━━\n"
+              "⚠️ <b>BUILD LOG</b>\n"
+              f"<pre>{log_text}</pre>"
+            ), silent=False)
+
+          else:
+            send_message((
+              "⚠️ <b>TIMEOUT</b>\n"
+              "━━━━━━━━━━━━━━━━━━━━━\n"
+              "No se pudo confirmar el estado del deploy\n"
+              f"📦 <code>{repo}</code>"
+            ), silent=False)
+          EOF
