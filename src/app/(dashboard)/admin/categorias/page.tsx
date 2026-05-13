@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, X, Image as ImageIcon, GripVertical } from 'lucide-react';
 import { ImageUpload } from '@/components/image-upload';
+import toast from 'react-hot-toast';
 
 interface Category {
   id: string;
@@ -23,6 +24,9 @@ export default function AdminCategoriasPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', image_url: '', sort_order: 0, is_active: true });
   const [saving, setSaving] = useState(false);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   useEffect(() => {
     loadCategories();
@@ -32,7 +36,7 @@ export default function AdminCategoriasPage() {
     setLoading(true);
     fetch('/api/categories', { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d) setCategories(d.data ?? []); })
+      .then(d => { if (d) setCategories((d.data ?? []).sort((a: Category, b: Category) => a.sort_order - b.sort_order)); })
       .catch(() => {})
       .finally(() => setLoading(false));
   };
@@ -66,6 +70,7 @@ export default function AdminCategoriasPage() {
     const res = await fetch(`/api/categories/${id}`, { method: 'DELETE', credentials: 'include' });
     if (res.ok) {
       setCategories(prev => prev.filter(c => c.id !== id));
+      toast.success('Categoría eliminada');
     }
   };
 
@@ -73,6 +78,76 @@ export default function AdminCategoriasPage() {
     setEditing(c);
     setForm({ name: c.name, description: c.description ?? '', image_url: c.image_url ?? '', sort_order: c.sort_order ?? 0, is_active: c.is_active });
     setShowCreate(true);
+  };
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedId(id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    if (draggedId && draggedId !== id) {
+      setDragOverId(id);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverId(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedId || draggedId === targetId) {
+      setDraggedId(null);
+      setDragOverId(null);
+      return;
+    }
+
+    const newCategories = [...categories];
+    const draggedIndex = newCategories.findIndex(c => c.id === draggedId);
+    const targetIndex = newCategories.findIndex(c => c.id === targetId);
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      setDraggedId(null);
+      setDragOverId(null);
+      return;
+    }
+
+    const [draggedItem] = newCategories.splice(draggedIndex, 1);
+    newCategories.splice(targetIndex, 0, draggedItem);
+
+    const updatedCategories = newCategories.map((c, i) => ({ ...c, sort_order: i }));
+    setCategories(updatedCategories);
+    setDraggedId(null);
+    setDragOverId(null);
+
+    saveNewOrder(updatedCategories);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDragOverId(null);
+  };
+
+  const saveNewOrder = async (updatedCategories: Category[]) => {
+    setReordering(true);
+    try {
+      const res = await fetch('/api/categories/reorder', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          orders: updatedCategories.map(c => ({ id: c.id, sort_order: c.sort_order }))
+        }),
+      });
+      if (!res.ok) throw new Error('Error saving order');
+      toast.success('Orden guardado');
+    } catch {
+      toast.error('Error al guardar el orden');
+      loadCategories();
+    }
+    setReordering(false);
   };
 
   const isOpen = showCreate || editing !== null;
@@ -94,8 +169,8 @@ export default function AdminCategoriasPage() {
       </div>
 
       <div style={{ background: '#fff', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-        <div style={{ padding: '1rem', borderBottom: '1px solid #e5e7eb' }}>
-          <div style={{ position: 'relative' }}>
+        <div style={{ padding: '1rem', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: 1, maxWidth: 300 }}>
             <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
             <input
               type="text"
@@ -104,6 +179,10 @@ export default function AdminCategoriasPage() {
               onChange={e => setSearch(e.target.value)}
               style={{ width: '100%', paddingLeft: '2.5rem', padding: '0.5rem 0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }}
             />
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <GripVertical size={14} />
+            <span>Arrastra para reordenar</span>
           </div>
         </div>
 
@@ -115,6 +194,7 @@ export default function AdminCategoriasPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f9fafb' }}>
+                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase', width: 50 }}>#</th>
                 <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase' }}>Imagen</th>
                 <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase' }}>Nombre</th>
                 <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase' }}>Descripción</th>
@@ -123,8 +203,26 @@ export default function AdminCategoriasPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(c => (
-                <tr key={c.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+              {filtered.map((c, index) => (
+                <tr
+                  key={c.id}
+                  draggable
+                  onDragStart={e => handleDragStart(e, c.id)}
+                  onDragOver={e => handleDragOver(e, c.id)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={e => handleDrop(e, c.id)}
+                  onDragEnd={handleDragEnd}
+                  style={{
+                    borderBottom: '1px solid #f3f4f6',
+                    cursor: 'grab',
+                    background: draggedId === c.id ? '#fef3c7' : dragOverId === c.id ? '#fef9c3' : '#fff',
+                    transition: 'background 0.2s',
+                    opacity: draggedId === c.id ? 0.5 : 1,
+                  }}
+                >
+                  <td style={{ padding: '0.75rem 1rem', color: '#9ca3af', fontSize: '0.75rem' }}>
+                    <GripVertical size={16} style={{ cursor: 'grab' }} />
+                  </td>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     {c.image_url ? (
                       <img src={c.image_url} alt={c.name} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: '0.5rem' }} />
@@ -156,6 +254,7 @@ export default function AdminCategoriasPage() {
             </tbody>
           </table>
         )}
+        {reordering && <div style={{ padding: '0.5rem', textAlign: 'center', background: '#fef3c7', fontSize: '0.875rem', color: '#92400e' }}>Guardando orden...</div>}
       </div>
 
       {isOpen && (
