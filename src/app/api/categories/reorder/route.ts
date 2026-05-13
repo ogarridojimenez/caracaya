@@ -2,7 +2,8 @@ import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function PUT(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  return NextResponse.json({ message: 'Endpoint working' });
+}
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
