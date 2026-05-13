@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     return NextResponse.json({ received: true, orders: body.orders });

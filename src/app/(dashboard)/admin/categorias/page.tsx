@@ -134,7 +134,7 @@ export default function AdminCategoriasPage() {
     setReordering(true);
     try {
       const res = await fetch('/api/categories/reorder', {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
