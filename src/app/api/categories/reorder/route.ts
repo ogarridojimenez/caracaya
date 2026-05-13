@@ -1,8 +1,12 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function PUT(request: NextRequest) {
-  return NextResponse.json({ message: 'Endpoint working' });
+  try {
+    const body = await request.json();
+    return NextResponse.json({ received: true, orders: body.orders });
+  } catch {
+    return NextResponse.json({ error: 'Invalid' }, { status: 400 });
+  }
 }
 
   const { data: { user } } = await supabase.auth.getUser();
