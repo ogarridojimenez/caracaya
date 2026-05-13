@@ -28,9 +28,20 @@ export async function POST(request: NextRequest) {
   const auth = await withAuth(request, ['manager_admin']);
   if ('error' in auth) return auth.error;
 
-  const { supabase } = auth.success;
   const body = await request.json();
 
+  if (body.orders && Array.isArray(body.orders)) {
+    const { supabase } = auth.success;
+    const updates = body.orders.map(({ id, sort_order }: { id: string; sort_order: number }) =>
+      supabase.from('categories').update({ sort_order }).eq('id', id)
+    );
+    const results = await Promise.all(updates);
+    const hasError = results.some(r => r.error);
+    if (hasError) return NextResponse.json({ error: 'Error updating order' }, { status: 500 });
+    return NextResponse.json({ success: true });
+  }
+
+  const { supabase } = auth.success;
   const { data, error } = await supabase
     .from('categories')
     .insert(body)

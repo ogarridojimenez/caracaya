@@ -133,7 +133,7 @@ export default function AdminCategoriasPage() {
   const saveNewOrder = async (updatedCategories: Category[]) => {
     setReordering(true);
     try {
-      const res = await fetch('/api/categories/reorder', {
+      const res = await fetch('/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
