@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { LayoutProviders } from './layout-providers';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Caracaya - Dulces, Refrescos y Comida',
@@ -30,7 +27,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={inter.className} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <LayoutProviders>{children}</LayoutProviders>
       </body>
     </html>

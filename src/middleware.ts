@@ -1,14 +1,16 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr';
 
-const PUBLIC_ROUTES = ['/', '/login', '/register'];
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/api/auth/login', '/api/auth/register', '/api/auth/recover'];
 const ADMIN_ROUTES = ['/admin'];
 const STAFF_ROUTES = ['/pedidos', '/vendedor', '/contabilidad'];
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  console.log(`[MIDDLEWARE] ${request.method} ${pathname}`);
 
   if (PUBLIC_ROUTES.includes(pathname)) {
+    console.log(`[MIDDLEWARE] Public route: ${pathname}`);
     return NextResponse.next();
   }
 
