@@ -3,7 +3,7 @@ import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@s
 
 const PUBLIC_ROUTES = ['/', '/login', '/register', '/api/auth/login', '/api/auth/register', '/api/auth/recover'];
 const ADMIN_ROUTES = ['/admin'];
-const STAFF_ROUTES = ['/pedidos', '/vendedor', '/contabilidad'];
+const STAFF_ONLY_ROUTES = ['/vendedor', '/contabilidad'];
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/vendedor', request.url));
   }
 
-  if (STAFF_ROUTES.some(r => pathname.startsWith(r)) && !isStaff) {
+  if (STAFF_ONLY_ROUTES.some(r => pathname.startsWith(r)) && !isStaff) {
     return NextResponse.redirect(new URL('/carrito', request.url));
   }
 
