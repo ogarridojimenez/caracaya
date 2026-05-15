@@ -45,7 +45,21 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error: any) {
+    console.log('[MIDDLEWARE] Auth error:', error?.message ?? 'Unknown error');
+    const errorCode = error?.__authError?.code ?? error?.code ?? '';
+    if (errorCode === 'refresh_token_not_found' || errorCode === 'invalid_refresh_token') {
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        console.log('[MIDDLEWARE] Sign out error:', signOutError.message);
+      }
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
 
   if (!user) {
     return NextResponse.redirect(new URL('/login', request.url));

@@ -18,9 +18,20 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const supabase = createServerSupabaseClient(request);
   
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error: any) {
+    console.error('[API/products POST] Auth error:', error?.message ?? 'Unknown');
+    const errorCode = error?.__authError?.code ?? error?.code ?? '';
+    if (errorCode === 'refresh_token_not_found' || errorCode === 'invalid_refresh_token') {
+      return NextResponse.json({ error: 'Sesión expirada. Por favor, inicia sesión nuevamente.' }, { status: 401 });
+    }
+  }
+
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

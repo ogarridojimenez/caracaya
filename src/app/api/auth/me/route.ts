@@ -4,7 +4,13 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 export async function GET() {
   const supabase = createServerSupabaseClient();
   
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error: any) {
+    console.error('[API/auth/me] Auth error:', error?.message ?? 'Unknown');
+  }
 
   if (!user) {
     return NextResponse.json({ user: null });

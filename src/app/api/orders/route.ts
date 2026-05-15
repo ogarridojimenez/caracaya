@@ -29,9 +29,20 @@ interface OrderItemRow {
 }
 
 export async function GET(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const supabase = createServerSupabaseClient(request);
 
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error: any) {
+    console.error('[API/orders GET] Auth error:', error?.message ?? 'Unknown');
+    const errorCode = error?.__authError?.code ?? error?.code ?? '';
+    if (errorCode === 'refresh_token_not_found' || errorCode === 'invalid_refresh_token') {
+      return NextResponse.json({ error: 'Sesión expirada. Por favor, inicia sesión nuevamente.' }, { status: 401 });
+    }
+  }
+
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -58,9 +69,20 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const supabase = createServerSupabaseClient(request);
 
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error: any) {
+    console.error('[API/orders] Auth error:', error?.message ?? 'Unknown');
+    const errorCode = error?.__authError?.code ?? error?.code ?? '';
+    if (errorCode === 'refresh_token_not_found' || errorCode === 'invalid_refresh_token') {
+      return NextResponse.json({ error: 'Sesión expirada. Por favor, inicia sesión nuevamente.' }, { status: 401 });
+    }
+  }
+
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -84,13 +106,22 @@ export async function POST(request: NextRequest) {
 
     const total = subtotal + (taxAmount ?? 0) - (discountAmount ?? 0);
 
+    let pickupTimeValue: string | null = null;
+    if (pickupTime) {
+      const today = new Date().toISOString().split('T')[0];
+      pickupTimeValue = `${today}T${pickupTime}:00`;
+    }
+
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
         user_id: user.id,
         status: 'pending',
+        subtotal,
         total,
-        pickup_time: pickupTime || null,
+        tax_amount: taxAmount ?? 0,
+        discount_amount: discountAmount ?? 0,
+        pickup_time: pickupTimeValue,
         notes: notes || null,
       })
       .select()

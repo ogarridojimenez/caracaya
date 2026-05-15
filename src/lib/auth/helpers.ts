@@ -13,8 +13,19 @@ export async function withAuth(
   request: NextRequest,
   requiredRoles?: UserRole[]
 ): Promise<{ error: NextResponse } | { success: AuthResult }> {
-  const supabase = createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const supabase = createServerSupabaseClient(request);
+  
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error: any) {
+    console.error('[withAuth] Auth error:', error?.message ?? 'Unknown');
+    const errorCode = error?.__authError?.code ?? error?.code ?? '';
+    if (errorCode === 'refresh_token_not_found' || errorCode === 'invalid_refresh_token') {
+      return { error: NextResponse.json({ error: 'Sesión expirada. Por favor, inicia sesión nuevamente.' }, { status: 401 }) };
+    }
+  }
 
   if (!user) {
     return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
