@@ -95,6 +95,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Se requiere al menos un producto' }, { status: 400 });
     }
 
+    const productIds = items.map((item: OrderItemInput) => item.productId);
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('id, name, stock_quantity, is_available')
+      .in('id', productIds);
+
+    if (productsError) {
+      return NextResponse.json({ error: 'Error al verificar productos' }, { status: 500 });
+    }
+
+    const unavailableItems: string[] = [];
+    for (const item of items) {
+      const product = products?.find(p => p.id === item.productId);
+      if (!product) {
+        unavailableItems.push(`${item.productName}: Producto no encontrado`);
+      } else if (!product.is_available) {
+        unavailableItems.push(`${item.productName}: No disponible`);
+      } else if (product.stock_quantity < item.quantity) {
+        unavailableItems.push(`${item.productName}: Stock insuficiente (disponible: ${product.stock_quantity})`);
+      }
+    }
+
+    if (unavailableItems.length > 0) {
+      return NextResponse.json({ error: unavailableItems.join(', '), available: false }, { status: 400 });
+    }
+
     const orderItems: Omit<OrderItemRow, 'order_id'>[] = items.map((item: OrderItemInput) => ({
       product_id: item.productId,
       product_name: item.productName,
