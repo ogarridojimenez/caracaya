@@ -1,0 +1,26 @@
+- generic [active] [ref=e2]:
+  - alert [ref=e1]
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - heading "Crear cuenta" [level=1] [ref=e10]
+      - paragraph [ref=e11]: Regístrate en Coffee App
+    - generic [ref=e12]:
+      - generic [ref=e36]: Las contraseñas no coinciden
+      - generic [ref=e13]:
+        - img [ref=e14]
+        - textbox "Nombre completo" [ref=e17]
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - textbox "Correo electrónico" [ref=e22]: admin@micafeteria.com
+      - generic [ref=e23]:
+        - img [ref=e24]
+        - textbox "Contraseña" [ref=e27]: Admin123!
+      - generic [ref=e28]:
+        - img [ref=e29]
+        - textbox "Confirmar contraseña" [ref=e32]
+      - button "Crear cuenta" [ref=e33] [cursor=pointer]
+    - paragraph [ref=e34]:
+      - text: ¿Ya tienes cuenta?
+      - link "Inicia sesión" [ref=e35] [cursor=pointer]:
+        - /url: /login

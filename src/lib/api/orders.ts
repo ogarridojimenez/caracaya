@@ -28,10 +28,25 @@ export interface CreateOrderInput {
   discountAmount?: number;
 }
 
-export async function getOrders(userId?: string): Promise<any[]> {
-  const params = userId ? `?userId=${userId}` : '';
-  const response = await fetchAPI(`/orders${params}`);
-  return response.data ?? [];
+export interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface OrdersResponse {
+  data: any[];
+  pagination: PaginationInfo;
+}
+
+export async function getOrders(userId?: string, page = 1, limit = 10): Promise<OrdersResponse> {
+  const params = new URLSearchParams();
+  if (userId) params.append('userId', userId);
+  params.append('page', page.toString());
+  params.append('limit', limit.toString());
+  const response = await fetchAPI(`/orders?${params.toString()}`);
+  return response;
 }
 
 export async function getOrder(id: string) {

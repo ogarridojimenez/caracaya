@@ -49,23 +49,47 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('userId');
+  const page = parseInt(searchParams.get('page') ?? '1');
+  const limit = parseInt(searchParams.get('limit') ?? '10');
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  const userRole = userData?.role ?? 'cliente';
+  const isStaff = userRole === 'vendedor' || userRole === 'manager_admin';
 
   let query = supabase
     .from('orders')
-    .select('*, order_items(*), user:users(full_name)')
-    .order('created_at', { ascending: false });
+    .select('*, order_items(*), user:users(full_name)', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
   if (userId) {
     query = query.eq('user_id', userId);
+  } else if (userRole === 'cliente') {
+    query = query.eq('user_id', user.id);
   }
 
-  const { data: orders, error } = await query;
+  const { data: orders, error, count } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ data: orders ?? [] });
+  return NextResponse.json({
+    data: orders ?? [],
+    pagination: {
+      page,
+      limit,
+      total: count ?? 0,
+      totalPages: Math.ceil((count ?? 0) / limit),
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {

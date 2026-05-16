@@ -4,7 +4,7 @@ import * as ordersApi from '@/lib/api/orders';
 export const ordersKeys = {
   all: ['orders'] as const,
   lists: () => [...ordersKeys.all, 'list'] as const,
-  list: (userId?: string) => [...ordersKeys.lists(), userId ?? 'all'] as const,
+  list: (userId?: string, page = 1, limit = 10) => [...ordersKeys.lists(), userId ?? 'all', page, limit] as const,
   details: () => [...ordersKeys.all, 'detail'] as const,
   detail: (id: string) => [...ordersKeys.details(), id] as const,
   summary: (filters?: { startDate?: string; endDate?: string }) => 
@@ -13,10 +13,10 @@ export const ordersKeys = {
     [...ordersKeys.all, 'daily', filters] as const,
 };
 
-export function useOrders(userId?: string) {
+export function useOrders(userId?: string, page = 1, limit = 10) {
   return useQuery({
-    queryKey: ordersKeys.list(userId),
-    queryFn: () => ordersApi.getOrders(userId),
+    queryKey: ordersKeys.list(userId, page, limit),
+    queryFn: () => ordersApi.getOrders(userId, page, limit),
   });
 }
 

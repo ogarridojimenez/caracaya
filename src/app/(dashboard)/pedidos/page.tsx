@@ -165,7 +165,8 @@ export default function PedidosPage() {
   const router = useRouter();
   const loadFromOrder = useCartStore(state => state.loadFromOrder);
 
-  const { data: orders, isLoading, error } = useOrders(isStaffUser ? undefined : user?.id);
+  const { data: ordersResponse, isLoading, error } = useOrders(isStaffUser ? undefined : user?.id);
+  const orders = ordersResponse?.data ?? [];
   const updateStatus = useUpdateOrderStatus();
 
   useEffect(() => {
