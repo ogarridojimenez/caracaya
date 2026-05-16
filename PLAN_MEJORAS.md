@@ -1,264 +1,240 @@
 # Plan de Mejoras - Caracaya App
 
-## Metodología de Trabajo
-- **Iterativa**: Una mejora a la vez, probar, validar
-- **Rollback**: Si algo falla, revertir al estado anterior
-- **Sin push**: Todo local hasta que el usuario lo autorice
+## Estado: ✅ FASE 1-5 COMPLETADAS
 
 ---
 
-## FASE 1: Fundamentos Críticos (Semana 1-2)
+## IMPLEMENTADO
 
-### 1.1 Sistema de Inventario con Stock
-**Problema:** Hay campos `stock_quantity` y `low_stock_threshold` pero no se usan para bloquear ventas.
+### FASE 1: Fundamentos Críticos
+- ✅ Sistema de Inventario con Stock (validación en orders API)
+- ✅ Auditoría de Seguridad RLS (políticas de autenticación)
+
+### FASE 2: Rendimiento y UX
+- ✅ Paginación en pedidos y productos
+- ✅ Next.js Image (configuración de dominios)
+- ✅ Loading Skeletons en páginas de admin
+
+### FASE 3: Limpieza y Mantenibilidad
+- ✅ Componentes UI (ProductCard, Section, Container)
+- ✅ Products API con filtros (featured, categoryId)
+- ✅ Tipos TypeScript centralizados (src/types/)
+
+### FASE 4: Funcionalidades Avanzadas
+- ✅ WebSockets/SSE para notificaciones tiempo real
+- ✅ Búsqueda debounceada (hook useDebounce)
+- ⚫ Dark Mode (excluido por el usuario)
+
+### FASE 5: Polish y Extras
+- ✅ Tests Unitarios (Vitest + React Testing Library)
+- ✅ Internacionalización (hook useTranslations)
+- ✅ Error Boundaries + página 500
+
+---
+
+## NUEVAS PROPUESTAS DE MEJORA
+
+## NIVEL 1: Quick Wins (1-2 días)
+
+### 1.1 Consistencia de Código
+**Problema:** No hay estándar de formato, cada开发者 formatea diferente.
 
 **Cambios a realizar:**
-- Modificar `/api/orders/route.ts` POST para validar stock antes de crear pedido
-- Agregar endpoint `/api/products/stock-check` para verificar múltiples items
-- Actualizar UI del carrito para mostrar disponibilidad
-
-**Archivos esperados:**
-- `src/app/api/orders/route.ts` - validar stock antes de crear
-- `src/app/api/products/stock/route.ts` (nuevo) - verificar stock
-- `src/lib/api/products.ts` - agregar función de verificación
+- Agregar Prettier + ESLint
+- Configurar lint-staged o husky para commits
+- Crear `.prettierrc` y `.eslintrc.json`
 
 **Prueba:**
-1. Crear producto con stock=2
-2. Agregar 3 unidades al carrito → debe mostrar error "Stock insuficiente"
-3. Agregar 2 unidades → debe permitir
-
-**Rollback:** Mantener código anterior sin validación de stock.
+1. npm run lint pasa sin errores
+2. git commit hook formatea automáticamente
 
 ---
 
-### 1.2 Auditoría de Seguridad RLS
-**Problema:** Inconsistencia entre roles en políticas RLS y tabla users.
+### 1.2 Más Tests de Hooks
+**Problema:** Solo hay test de useDebounce, hooks críticos sin cobertura.
 
 **Cambios a realizar:**
-- Revisar políticas en `supabase/migrations/`
-- Verificar que todas las tablas tengan RLS apropiado
-- Asegurar que `vendedor` solo vea lo necesario
+- Tests para useNotifications
+- Tests para useCart (zustand store)
+- Tests para useOrders
 
 **Prueba:**
-1. Login como vendedor
-2. Intentar acceder a `/api/auth/users` → debe bloquear
-3. Intentar acceder a `/api/products` → debe permitir solo lectura
-
-**Rollback:** Restaurar políticas anteriores si hay problemas de acceso legítimos.
+1. npm run test → más de 10 tests pasando
+2. Coverage > 50%
 
 ---
 
-## FASE 2: Rendimiento y UX (Semana 2-3)
-
-### 2.1 Paginación
-**Problema:** No hay paginación, con muchos pedidos/products la UI colapsa.
+### 1.3 Barrel Exports
+**Carpetas sin index.ts dificultan imports.
 
 **Cambios a realizar:**
-- Modificar hooks `useOrders` y `useProducts` para aceptar parámetros de paginación
-- Agregar UI de paginación en `/admin/pedidos` y `/admin/productos`
-
-**Archivos esperados:**
-- `src/features/orders/hooks.ts` - agregar paginación
-- `src/features/products/hooks.ts` - agregar paginación
-- `src/app/(dashboard)/admin/orders/page.tsx` - agregar controles paginación
+- Crear index.ts en: components/ui, features/orders, features/products, lib/api, hooks
 
 **Prueba:**
-1. Crear más de 20 pedidos
-2. Ver que aparecen max 10 por página
-3. Navegar entre páginas funciona
-
-**Rollback:** Mantener vista sin paginación.
+1. Import paths más limpios
+2. IDE autocomplete funciona mejor
 
 ---
 
-### 2.2 Next.js Image
-**Problema:** No se usa `<Image />` de Next.js, pérdida de rendimiento.
+## NIVEL 2: Estabilidad (1 semana)
+
+### 2.1 React Query Configuración
+**Problema:** No hay cache óptimo, cada componente hace sus propias llamadas.
 
 **Cambios a realizar:**
-- Agregar dominio `images.unsplash.com` a `next.config.js`
-- Reemplazar `<img>` por `<Image />` en landing page
-
-**Archivos:**
-- `next.config.js` - agregar dominio externo
-- `src/app/page.tsx` - usar Image para productos
+- Configurar QueryClientProvider global
+- Crear useQuery configs con staleTime apropiado
+- Agregar prefetching en páginas relacionadas
 
 **Prueba:**
-1. Build pasa sin errores de imagen
-2. Imágenes cargan correctamente en producción
-
-**Rollback:** Revertir a etiquetas img originales.
+1. Menos requests a la API en navegación
+2. Estado cache persiste entre páginas
 
 ---
 
-### 2.3 Loading Skeletons
-**Problema:** Estados vacíos cuando carga, UX pobre.
+### 2.2 Rate Limiting en APIs
+**Problema:** APIs expuestas a ataques de fuerza bruta.
 
 **Cambios a realizar:**
-- Crear componente `Skeleton.tsx` en `src/components/ui/`
-- Agregar skeletons a páginas de admin
+- Agregar rate-limit a endpoints críticos (/auth/*)
+- Implementar en middleware o endpoint específico
+- Configurar límites por IP/user
 
 **Prueba:**
-1. Recargar página de pedidos
-2. Ver skeleton mientras carga
-3. Contenido aparece después
-
-**Rollback:** Quitar skeletons, volver a spinners/txt simple.
+1. POST /auth/login > 5 veces → 429 Too Many Requests
+2. Logs muestran intentos bloqueados
 
 ---
 
-## FASE 3: Limpieza y Mantenibilidad (Semana 3-4)
-
-### 3.1 Componentizar Landing Page
-**Problema:** Estilos inline hardcoded, difícil mantenimiento.
+### 2.3 Tests de Componentes UI
+**Problema:** No hay tests de componentes visuales.
 
 **Cambios a realizar:**
-- Crear componentes: `Button`, `Card`, `Section`, `Container`
-- Reemplazar inline styles por Tailwind classes
-
-**Archivos nuevos:**
-- `src/components/ui/Button.tsx`
-- `src/components/ui/Card.tsx`
-- `src/components/ui/Section.tsx`
-- `src/components/ui/Container.tsx`
+- Tests para ProductCard (render, hover states)
+- Tests para OrderCard (status colors, actions)
+- Tests para AddToCartButton
 
 **Prueba:**
-1. Landing se ve igual que antes
-2. Estilos responsive funcionan
-3. No hay errores de console
-
-**Rollback:** Mantener estilos inline originales.
+1. coverage de componentes > 60%
 
 ---
 
-### 3.2 Productos desde Base de Datos
-**Problema:** Landing hardcodea productos, no lee de DB.
+## NIVEL 3: Profesionalización (2-3 semanas)
+
+### 3.1 CI/CD con GitHub Actions
+**Problema:** No hay validación automática en push.
 
 **Cambios a realizar:**
-- Agregar endpoint `/api/products?featured=true`
-- Landing lee productos destacados de la API
+- Crear `.github/workflows/ci.yml`
+- Runs: lint, build, test en cada PR
+- Badge de status en README
 
 **Prueba:**
-1. Marcar productos como "featured" en DB
-2. Landing muestra esos productos
-3. Cambios en DB reflejan en landing
-
-**Rollback:** Volver a productos hardcoded.
+1. PR triggea pipeline automáticamente
+2. Merge bloqueado si build/test falla
 
 ---
 
-### 3.3 Tipos TypeScript
-**Problema:** Uso excesivo de `any`, sin tipos definidos.
-
-**Cambios a crear:**
-- `src/types/order.ts` - tipos para pedidos
-- `src/types/product.ts` - tipos para productos
-- `src/types/user.ts` - tipos para usuarios
-
-**Prueba:**
-1. Build pasa sin errores de tipos
-2. Autocomplete funciona en IDE
-
-**Rollback:** Mantener tipos `any` donde estaban.
-
----
-
-## FASE 4: Funcionalidades Avanzadas (Semana 4-5)
-
-### 4.1 WebSockets para Pedidos en Tiempo Real
-**Problema:** No hay actualizaciones en tiempo real.
+### 3.2 E2E con Playwright
+**Problema:** No hay tests de flujos completos.
 
 **Cambios a realizar:**
-- Configurar Supabase Realtime en el cliente
-- Agregar suscripción a cambios en pedidos
+- Instalar Playwright
+- Tests: login → add to cart → checkout
+- Tests: admin order management
 
 **Prueba:**
-1. Abrir dos navegadores (vendedor y admin)
-2. Crear pedido en uno → aparece en otro automáticamente
+1. npm run e2e → tests de flujos críticos pasando
 
-**Rollback:** Quitar suscripción, mantener polling actual.
+---
+
+### 3.3 Sentry para Error Tracking
+**Problema:** No hay forma detrackear errores en producción.
+
+**Cambios a realizar:**
+- Agregar @sentry/nextjs
+- Configurar DSN en environment
+- Agregar contexto de usuario en errores
+
+**Prueba:**
+1. Errors en producción aparecen en Sentry dashboard
+
+---
+
+## NIVEL 4: Escalabilidad (1 mes+)
+
+### 4.1 Rediseño Landing con Tailwind
+**Problema:** Landing usa CSS inline, difícil de mantener.
+
+**Cambios a realizar:**
+- Convertir page.tsx a componentes Tailwind
+- Usar los componentes UI ya creados
+- Mantener mismo diseño visual
+
+**Prueba:**
+1. Landing idéntico visualmente
+2. Mantenibilidad mejorada (styles en clases)
 
 ---
 
 ### 4.2 Dark Mode
-**Problema:** Solo hay modo claro.
+**Problema:** Solo modo claro disponible.
 
 **Cambios a realizar:**
-- Agregar ThemeProvider con Zustand
-- Toggle en navbar
-- Variables CSS para colores
+- Crear ThemeProvider (Zustand o Context)
+- Agregar toggle en navbar
+- Variables CSS para theme colors
 
 **Prueba:**
-1. Toggle dark mode funciona
+1. Toggleswitch cambia tema
 2. Todas las páginas respetan theme
-3. Persiste al recargar
-
-**Rollback:** Mantener solo modo claro.
+3. Persiste en localStorage
 
 ---
 
-### 4.3 Búsqueda Debounceada
-**Problema:** Búsqueda hace request en cada keystroke.
+### 4.3 PWA - Service Workers
+**Problema:** No funciona offline.
 
 **Cambios a realizar:**
-- Agregar debounce de 300ms en búsquedas
--hook `useDebounce` en `src/lib/hooks/`
+- Agregar next-pwa o similar
+- Configurar manifest.json
+- Cache de assets estáticos
 
 **Prueba:**
-1. Escribir en search box
-2. Solo hace request después de 300ms de pausa
-3. UX más fluida
-
-**Rollback:** Quitar debounce, inmediata.
+1. Installable como app
+2. Funciona offline (partial)
 
 ---
 
-## FASE 5: Polish y Extras (Semana 5-6)
+## Resumen de Mejoras Pendientes
 
-### 5.1 Tests Unitarios
-- Agregar Vitest + React Testing Library
-- Cover componentes críticos
-
-### 5.2 Internacionalización (i18n)
-- Agregar next-intl o similar
-- Keys de texto en JSON
-
-### 5.3 Error Boundaries
-- Crear ErrorBoundary global
-- Página 500 personalizada
-
----
-
-## Resumen de Fases
-
-| Fase | Duración | Items |
-|------|----------|-------|
-| 1. Fundamentos | 1-2 sem | Inventario, Seguridad RLS |
-| 2. Rendimiento | 2-3 sem | Paginación, Image, Skeletons |
-| 3. Limpieza | 3-4 sem | Componentes UI, DB Products, Types |
-| 4. Avanzado | 4-5 sem | WebSockets, Dark Mode, Debounce |
-| 5. Polish | 5-6 sem | Tests, i18n, ErrorBoundary |
+| Nivel | Prioridad | Tiempo | Impacto |
+|-------|-----------|--------|---------|
+| 1. Quick Wins | 🔴 Alta | 1-2 días | Consistencia código |
+| 2. Estabilidad | 🔴 Alta | 1 semana | Performance + seguridad |
+| 3. Profesional | 🟡 Media | 2-3 sem | DevOps + testing |
+| 4. Escalabilidad | 🟢 Baja | 1 mes | UX + offline |
 
 ---
 
 ## Order Sugerido de Implementación
 
-1. **Inventario** - Más crítico para el negocio
-2. **Seguridad RLS** - Evitar problemas de acceso
-3. **Paginación** - Cuando crezca el catálogo
-4. **Limpieza landing** - Mantenibilidad inmediata
-5. **Dark mode** - Feature popular
-6. **WebSockets** - Para experiencia en tiempo real
+1. **Prettier + ESLint** - Base para cualquier开发
+2. **Más tests** - Confianza al hacer cambios
+3. **React Query** - Performance inmediato
+4. **CI/CD** - Quality gate en merges
+5. **E2E** - Confianza en flujos críticos
 
 ---
 
 ## Notas Importantes
 
-- **No modificar login/register** - El documento lo indica explícitamente
-- **Probar cada cambio localmente** - npm run dev
-- **Verificar build** - npm run build antes de cualquier commit
-- **Mantener coherencia** - Seguir estilos existentes del proyecto
+- **No modificar login/register** - Mantener funcionando
+- **Probar cada cambio** - npm run dev + build
+- **Verificar tipos** - npm run build sin errores
+- **Tests deben pasar** - npm run test
 
 ---
 
-*Documento creado: 2026-05-15*
-*Revisión: Pending*
+*Documento actualizado: 2026-05-16*
+*Estado: FASE 1-5 completadas, nuevas mejoras propuestas*
