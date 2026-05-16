@@ -1,3 +1,5 @@
+import type { User } from '@/domain/types/database';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
 export async function login(email: string, password: string) {
@@ -40,7 +42,7 @@ export async function logout() {
   if (!res.ok) throw new Error('Logout failed');
 }
 
-export async function getCurrentUser(): Promise<{ user: any } | null> {
+export async function getCurrentUser(): Promise<{ user: User } | null> {
   const res = await fetch(`${API_BASE}/auth/me`, {
     credentials: 'include',
   });

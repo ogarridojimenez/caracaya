@@ -1,3 +1,5 @@
+import type { Order, OrderItem } from '@/domain/types/database';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
 async function fetchAPI(endpoint: string, options?: RequestInit) {
@@ -35,8 +37,28 @@ export interface PaginationInfo {
   totalPages: number;
 }
 
+export interface OrderAPIResponse {
+  id: string;
+  order_number: string;
+  user_id: string | null;
+  status: import('@/domain/types/database').OrderStatus;
+  subtotal: number;
+  tax_amount: number;
+  discount_amount: number;
+  total: number;
+  notes: string | null;
+  pickup_time: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  order_items?: OrderItem[];
+  items?: OrderItem[];
+  user?: { full_name: string | null };
+  [key: string]: unknown;
+}
+
 export interface OrdersResponse {
-  data: any[];
+  data: OrderAPIResponse[];
   pagination: PaginationInfo;
 }
 

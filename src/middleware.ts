@@ -1,86 +1,74 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-const PUBLIC_ROUTES = ['/', '/login', '/register', '/api/auth/login', '/api/auth/register', '/api/auth/recover'];
-const ADMIN_ROUTES = ['/admin'];
-const STAFF_ONLY_ROUTES = ['/vendedor', '/contabilidad'];
-
-export async function middleware(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
-  console.log(`[MIDDLEWARE] ${request.method} ${pathname}`);
-
-  if (PUBLIC_ROUTES.includes(pathname)) {
-    console.log(`[MIDDLEWARE] Public route: ${pathname}`);
-    return NextResponse.next();
-  }
-
+export async function middleware(req: NextRequest) {
   const response = NextResponse.next({
-    request: { headers: request.headers },
+    request: {
+      headers: req.headers,
+    },
   });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
     {
       cookies: {
         getAll() {
-          const cookies = parseCookieHeader(request.headers.get('Cookie') ?? '');
-          return cookies.map(c => ({ name: c.name, value: c.value ?? '' }));
+          return req.cookies.getAll().map((c) => ({ name: c.name, value: c.value }));
         },
-        setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set({
-              name,
-              value,
-              ...options,
-            });
-          });
-          if (headers) {
-            Object.entries(headers).forEach(([key, value]) => {
-              response.headers.set(key, value);
-            });
-          }
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
         },
       },
     }
   );
 
-  let user = null;
-  try {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
-  } catch (error: any) {
-    console.log('[MIDDLEWARE] Auth error:', error?.message ?? 'Unknown error');
-    const errorCode = error?.__authError?.code ?? error?.code ?? '';
-    if (errorCode === 'refresh_token_not_found' || errorCode === 'invalid_refresh_token') {
-      const { error: signOutError } = await supabase.auth.signOut();
-      if (signOutError) {
-        console.log('[MIDDLEWARE] Sign out error:', signOutError.message);
-      }
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
+  const { data: { session } } = await supabase.auth.getSession();
+
+  const { pathname } = req.nextUrl;
+
+  const publicRoutes = ['/', '/login', '/register', '/products', '/api/auth'];
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+
+  if (!session && !isPublicRoute) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
   }
 
-  if (!user) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  if (session && (pathname === '/login' || pathname === '/register')) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
   }
 
-  const { data: userProfile } = await supabase
+  const { data: userData } = await supabase
     .from('users')
     .select('role')
-    .eq('id', user.id)
+    .eq('id', session?.user?.id)
     .single();
 
-  const role = userProfile?.role ?? 'cliente';
-  const isManager = role === 'manager_admin';
-  const isStaff = role === 'vendedor' || isManager;
+  const role = userData?.role ?? 'cliente';
 
-  if (pathname.startsWith('/admin') && !isManager) {
-    return NextResponse.redirect(new URL('/vendedor', request.url));
+  if (pathname.startsWith('/admin') && !['manager_admin'].includes(role)) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
   }
 
-  if (STAFF_ONLY_ROUTES.some(r => pathname.startsWith(r)) && !isStaff) {
-    return NextResponse.redirect(new URL('/carrito', request.url));
+  if (pathname.startsWith('/vendedor') && !['vendedor', 'manager_admin'].includes(role)) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
+
+  if (pathname.startsWith('/contabilidad') && !['manager_admin'].includes(role)) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
   }
 
   return response;
@@ -88,6 +76,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons/.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

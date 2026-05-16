@@ -155,7 +155,7 @@ const notificationSound = typeof window !== 'undefined' ? new Audio('data:audio/
 export default function PedidosPage() {
   const { user } = useAuth();
   const isStaffUser = user ? isStaff(user.role) : false;
-  const isClientOwner = (orderUserId: string) => user?.id === orderUserId;
+  const isClientOwner = (orderUserId: string | null | undefined) => user?.id === orderUserId;
 
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [searchQuery, setSearchQuery] = useState('');
