@@ -1,28 +1,32 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useProducts } from '@/features/products/hooks';
 import { AddToCartButton } from '@/features/orders/components';
 import { ShoppingBag, Search } from 'lucide-react';
 import { useCartStore } from '@/store';
 import type { Product } from '@/domain/types/database';
 import { SkeletonProductCard } from '@/components/ui/skeleton';
+import { useDebounce } from '@/hooks/use-debounce';
 
 export default function CarritoPage() {
   const [mounted, setMounted] = useState(false);
   const { _hasHydrated } = useCartStore();
   const { data, isLoading, error } = useProducts();
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const products = data ?? [];
-  const filteredProducts = products.filter((p: Product) => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    return matchesSearch && p.is_available;
-  });
+  const filteredProducts = useMemo(() => {
+    return products.filter((p: Product) => {
+      const matchesSearch = p.name.toLowerCase().includes(debouncedSearch.toLowerCase());
+      return matchesSearch && p.is_available;
+    });
+  }, [products, debouncedSearch]);
 
   if (!mounted) {
     return (

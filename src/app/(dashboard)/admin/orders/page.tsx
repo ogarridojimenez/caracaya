@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOrders, useUpdateOrderStatus } from '@/features/orders/hooks';
-import { Package, Search, Clock, Check, X, AlertCircle, ChevronRight, Filter } from 'lucide-react';
+import { Package, Search, Clock, Check, X, AlertCircle, ChevronRight, Filter, Wifi, WifiOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { OrderStatus } from '@/domain/types/database';
+import { useNotifications } from '@/hooks/use-notifications';
 
 const statusConfig: Record<OrderStatus, { label: string; color: string; bgColor: string; nextStatus: OrderStatus | null }> = {
   pending: { label: 'Pendiente', color: 'text-yellow-800', bgColor: 'bg-yellow-100', nextStatus: 'confirmed' },
@@ -16,9 +17,21 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; bgColor:
 };
 
 export default function AdminOrdersPage() {
-  const { data: ordersResponse, isLoading } = useOrders();
+  const { data: ordersResponse, isLoading, refetch } = useOrders();
   const orders = ordersResponse?.data ?? [];
   const updateStatus = useUpdateOrderStatus();
+  const { isConnected, lastNotification, requestPermission } = useNotifications();
+
+  useEffect(() => {
+    requestPermission();
+  }, [requestPermission]);
+
+  useEffect(() => {
+    if (lastNotification?.type === 'new_order') {
+      refetch();
+      toast.success(`Nuevo pedido recibido: #${lastNotification.orderId}`);
+    }
+  }, [lastNotification, refetch]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -62,12 +75,18 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Package className="h-6 w-6" />
-          Gestión de Pedidos
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">{orders?.length ?? 0} pedidos en total</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Package className="h-6 w-6" />
+            Gestión de Pedidos
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">{orders?.length ?? 0} pedidos en total</p>
+        </div>
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          {isConnected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
+          {isConnected ? 'Tiempo real' : 'Desconectado'}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">

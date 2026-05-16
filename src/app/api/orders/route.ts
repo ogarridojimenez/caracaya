@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { orderEvents } from '@/lib/order-events';
 
 interface OrderItemInput {
   productId: string;
@@ -197,6 +198,16 @@ export async function POST(request: NextRequest) {
       .select('*, order_items(*), user:users(full_name)')
       .eq('id', order.id)
       .single();
+
+    orderEvents.emit({
+      orderId: order.id,
+      orderNumber: order.order_number,
+      customerName: orderWithItems?.user?.full_name ?? 'Cliente',
+      status: order.status,
+      total: order.total,
+      items: orderItems.length,
+      createdAt: new Date().toISOString()
+    });
 
     return NextResponse.json({ data: orderWithItems }, { status: 201 });
 
