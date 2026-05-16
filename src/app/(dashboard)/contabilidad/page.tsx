@@ -13,7 +13,8 @@ const months = [
 const PIE_COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#8b5cf6', '#ec4899', '#06b6d4'];
 
 export default function ContabilidadPage() {
-  const { data: orders } = useOrders();
+  const { data: ordersResponse } = useOrders();
+  const orders = ordersResponse?.data ?? [];
   const { data: dailySales } = useDailySales();
   const [closes, setCloses] = useState<any[]>([]);
   const [loadingCloses, setLoadingCloses] = useState(true);

@@ -16,7 +16,8 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; bgColor:
 };
 
 export default function AdminOrdersPage() {
-  const { data: orders, isLoading } = useOrders();
+  const { data: ordersResponse, isLoading } = useOrders();
+  const orders = ordersResponse?.data ?? [];
   const updateStatus = useUpdateOrderStatus();
 
   const [searchQuery, setSearchQuery] = useState('');

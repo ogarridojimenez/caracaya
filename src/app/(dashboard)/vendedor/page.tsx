@@ -35,7 +35,8 @@ export default function DashboardVendedor() {
   const { user } = useAuth();
   const [timeRange, setTimeRange] = useState(7);
 
-  const { data: orders, isLoading } = useOrders();
+  const { data: ordersResponse, isLoading } = useOrders();
+  const orders = ordersResponse?.data ?? [];
   const { data: summary } = useSalesSummary();
   const updateStatus = useUpdateOrderStatus();
 

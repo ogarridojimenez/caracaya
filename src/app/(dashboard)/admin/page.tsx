@@ -16,7 +16,8 @@ const statusConfig = [
 ];
 
 export default function AdminDashboard() {
-  const { data: orders } = useOrders();
+  const { data: ordersResponse } = useOrders();
+  const orders = ordersResponse?.data ?? [];
   const { data: summary } = useSalesSummary();
   const { data: dailySales } = useDailySales();
   const [closes, setCloses] = useState<any[]>([]);
