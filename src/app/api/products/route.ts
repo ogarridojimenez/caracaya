@@ -4,11 +4,25 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 export async function GET(request: NextRequest) {
   const supabase = createServerSupabaseClient();
   
-  const { data, error } = await supabase
+  const { searchParams } = new URL(request.url);
+  const featured = searchParams.get('featured') === 'true';
+  const categoryId = searchParams.get('categoryId');
+
+  let query = supabase
     .from('products')
     .select('*')
     .eq('is_available', true)
     .order('name');
+
+  if (featured) {
+    query = query.eq('is_featured', true);
+  }
+
+  if (categoryId) {
+    query = query.eq('category_id', categoryId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
