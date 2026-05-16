@@ -6,6 +6,7 @@ import { AddToCartButton } from '@/features/orders/components';
 import { ShoppingBag, Search } from 'lucide-react';
 import { useCartStore } from '@/store';
 import type { Product } from '@/domain/types/database';
+import { SkeletonProductCard } from '@/components/ui/skeleton';
 
 export default function CarritoPage() {
   const [mounted, setMounted] = useState(false);
@@ -50,7 +51,22 @@ export default function CarritoPage() {
   }
 
   if (isLoading) {
-    return <div className="text-center py-12">Cargando productos...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white shadow-sm sticky top-0 z-30">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <h1 className="text-2xl font-bold text-gray-900">Menú</h1>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <SkeletonProductCard key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
