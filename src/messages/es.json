@@ -1,0 +1,56 @@
+{
+  "Common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "search": "Buscar",
+    "noResults": "No hay resultados",
+    "back": "Volver"
+  },
+  "Nav": {
+    "home": "Inicio",
+    "menu": "Menú",
+    "cart": "Carrito",
+    "orders": "Pedidos",
+    "profile": "Perfil",
+    "admin": "Admin",
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión"
+  },
+  "Auth": {
+    "loginTitle": "Inicia sesión en tu cuenta",
+    "registerTitle": "Crea tu cuenta",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "fullName": "Nombre completo",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "register": "Regístrate",
+    "loginButton": "Iniciar sesión"
+  },
+  "Order": {
+    "title": "Pedidos",
+    "status": {
+      "pending": "Pendiente",
+      "confirmed": "Confirmado",
+      "preparing": "Preparando",
+      "ready": "Listo",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    },
+    "items": "items",
+    "total": "Total",
+    "pickupTime": "Hora de retiro"
+  },
+  "Product": {
+    "addToCart": "Agregar al carrito",
+    "outOfStock": "Sin stock",
+    "price": "Precio",
+    "description": "Descripción",
+    "category": "Categoría"
+  }
+}
