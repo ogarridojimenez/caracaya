@@ -2,48 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Clock, MapPin, Phone, ChevronDown, Star, Users, Award, Cake, Cookie, IceCream, Sandwich } from 'lucide-react';
+import { FEATURED_PRODUCTS, TESTIMONIALS } from '@/data/landing-data';
 
-const FEATURED_PRODUCTS = [
-  {
-    name: 'Pastel de Chocolate',
-    description: 'Triple chocolate con cobertura de ganache',
-    price: 4.50,
-    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop',
-    popular: true,
-  },
-  {
-    name: 'Galletas Artesanales',
-    description: 'Mantequilla, chispas de chocolate y avena',
-    price: 2.50,
-    image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=400&fit=crop',
-    popular: true,
-  },
-  {
-    name: 'Refresco de Tamarindo',
-    description: 'Tradicional mexicano con tamarindo real',
-    price: 3.00,
-    image: 'https://images.unsplash.com/photo-1546171758-93a9e21777bc?w=400&h=400&fit=crop',
-    popular: true,
-  },
-  {
-    name: 'Sandwich de Jamón',
-    description: 'Pan artesanal, jamón serrano y queso',
-    price: 5.00,
-    image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&h=400&fit=crop',
-    popular: false,
-  },
-];
-
-const TESTIMONIALS = [
-  { name: 'Carlos Mendoza', text: 'Los mejores postres de la zona. El pastel de chocolate es increíble.', rating: 5 },
-  { name: 'Ana García', text: 'Vengo siempre por los refrescos. El de tamarindo es mi favorito.', rating: 5 },
-  { name: 'Roberto López', text: 'Las galletas artesanales son adictivas. Muy recomendables.', rating: 4 },
-];
+const ICONS: Record<string, React.ComponentType<{ className?: string; style?: object }>> = {
+  Clock, MapPin, Phone, Award, Cookie, Users, Cake
+};
 
 export default function LandingPage() {
-  const router = useRouter();
   const heroRef = useRef<HTMLDivElement>(null);
   const [scrollY, setScrollY] = useState(0);
 
