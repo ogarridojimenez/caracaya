@@ -77,3 +77,37 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({ data: closesWithTotals, orders: orders ?? [] });
 }
+
+export async function POST(request: NextRequest) {
+  const auth = await withAuth(request, ['manager_admin', 'vendedor']);
+  if ('error' in auth) return auth.error;
+
+  const { supabase, userId } = auth.success;
+
+  const body = await request.json();
+
+  const { close_date, cash_total, card_total, transfer_total, notes } = body;
+
+  if (!close_date) {
+    return NextResponse.json({ error: 'close_date es requerido' }, { status: 400 });
+  }
+
+  const { data, error } = await supabase
+    .from('daily_closes')
+    .insert({
+      close_date,
+      cash_total: cash_total ?? 0,
+      card_total: card_total ?? 0,
+      transfer_total: transfer_total ?? 0,
+      notes: notes ?? '',
+      created_by: userId,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ data }, { status: 201 });
+}

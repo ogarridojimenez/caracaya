@@ -1,10 +1,16 @@
 import { NextRequest } from 'next/server';
 import { sseClients } from '@/lib/sse-clients';
 import { orderEvents } from '@/lib/order-events';
+import { withAuth } from '@/lib/auth/helpers';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const auth = await withAuth(request, ['manager_admin', 'vendedor', 'cliente']);
+  if ('error' in auth) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
   const encoder = new TextEncoder();
   
   const stream = new ReadableStream({

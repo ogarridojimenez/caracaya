@@ -69,13 +69,15 @@ export async function PATCH(
   const isStaff = userData?.role === 'vendedor' || userData?.role === 'manager_admin';
   const isOwner = order.user_id === user.id;
 
-  if (status === 'cancelled' && !isStaff) {
-    if (!isOwner) {
+  if (status === 'cancelled') {
+    if (!isStaff && !isOwner) {
       return NextResponse.json({ error: 'No puedes cancelar este pedido' }, { status: 403 });
     }
-    if (order.status !== 'pending') {
+    if (!isStaff && order.status !== 'pending') {
       return NextResponse.json({ error: 'Solo se pueden cancelar pedidos pendientes' }, { status: 400 });
     }
+  } else if (!isStaff) {
+    return NextResponse.json({ error: 'Solo el staff puede cambiar el estado del pedido' }, { status: 403 });
   }
 
   const updates: Partial<Order> = { status };

@@ -1,6 +1,15 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { withAuth } from '@/lib/auth/helpers';
 
+function sanitizeCSV(value: string | undefined | null): string {
+  if (value === undefined || value === null) return '';
+  const str = String(value);
+  if (/^[\s+\-@\t\r\n]/.test(str) || str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `'${str.replace(/"/g, '""')}`;
+  }
+  return str;
+}
+
 export async function GET(request: NextRequest) {
   const auth = await withAuth(request, ['manager_admin', 'vendedor']);
   if ('error' in auth) return auth.error;
@@ -28,9 +37,9 @@ export async function GET(request: NextRequest) {
     return [
       date.toLocaleDateString('es-ES'),
       date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-      order.order_number,
-      (order.user as { full_name?: string })?.full_name || 'Cliente',
-      order.status,
+      sanitizeCSV(order.order_number),
+      sanitizeCSV((order.user as { full_name?: string })?.full_name || 'Cliente'),
+      sanitizeCSV(order.status),
       order.subtotal?.toFixed(2) || '0.00',
       order.tax_amount?.toFixed(2) || '0.00',
       order.discount_amount?.toFixed(2) || '0.00',

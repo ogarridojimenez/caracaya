@@ -1,7 +1,17 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+  const identifier = getRateLimitIdentifier(request);
+  
+  if (!checkRateLimit(identifier)) {
+    return NextResponse.json(
+      { error: 'Demasiados intentos. Intenta de nuevo en 1 minuto.' },
+      { status: 429 }
+    );
+  }
+
   const supabase = createServerSupabaseClient(request);
   const { email, password } = await request.json();
 

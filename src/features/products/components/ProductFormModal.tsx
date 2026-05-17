@@ -82,6 +82,24 @@ export function ProductFormModal({ isOpen, onClose, product }: ProductFormModalP
 
     setIsSubmitting(true);
     try {
+      let imageUrl = product?.image_url ?? null;
+
+      if (imageFile) {
+        const formDataUpload = new FormData();
+        formDataUpload.append('file', imageFile);
+
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formDataUpload,
+          credentials: 'include',
+        });
+
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          imageUrl = uploadData.url;
+        }
+      }
+
       const data = {
         name: formData.name,
         description: formData.description || null,
@@ -89,7 +107,7 @@ export function ProductFormModal({ isOpen, onClose, product }: ProductFormModalP
         category_id: formData.category_id,
         stock_quantity: parseInt(formData.stock_quantity) || 0,
         is_available: formData.is_available,
-        image_url: product?.image_url ?? null,
+        image_url: imageUrl,
         is_featured: false,
       };
 

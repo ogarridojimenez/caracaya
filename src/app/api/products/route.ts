@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth, isAdmin } from '@/lib/auth/helpers';
 
 export async function GET(request: NextRequest) {
   const supabase = createServerSupabaseClient();
@@ -32,27 +33,20 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerSupabaseClient(request);
-  
-  let user = null;
-  try {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
-  } catch (error: any) {
-    console.error('[API/products POST] Auth error:', error?.message ?? 'Unknown');
-    const errorCode = error?.__authError?.code ?? error?.code ?? '';
-    if (errorCode === 'refresh_token_not_found' || errorCode === 'invalid_refresh_token') {
-      return NextResponse.json({ error: 'Sesión expirada. Por favor, inicia sesión nuevamente.' }, { status: 401 });
-    }
+  const authResult = await withAuth(request, ['manager_admin']);
+
+  if ('error' in authResult) {
+    return authResult.error;
   }
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { success } = authResult;
+  if (!isAdmin(success.role)) {
+    return NextResponse.json({ error: 'Forbidden: Solo administradores pueden crear productos' }, { status: 403 });
   }
 
   const body = await request.json();
-  
-  const { data, error } = await supabase
+
+  const { data, error } = await success.supabase
     .from('products')
     .insert(body)
     .select()

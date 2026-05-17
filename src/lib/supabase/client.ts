@@ -1,3 +1,8 @@
-// El cliente de Supabase para el navegador se ha eliminado.
-// Ahora toda comunicación con la base de datos se hace a través de la API (/src/app/api)
-// para mantener una arquitectura de backend separado del frontend.
+import { createBrowserClient as createClient } from '@supabase/ssr';
+
+export function createBrowserClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}

@@ -2,8 +2,10 @@
 
 import { useEffect, useState, createContext, useContext, useRef, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { createBrowserClient } from '@/lib/supabase/client';
 import * as authApi from '@/lib/api/auth';
 import type { UserRole } from '@/domain/types/database';
+import toast from 'react-hot-toast';
 
 const roleRoutes: Record<UserRole, string> = {
   cliente: '/carrito',
@@ -32,6 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isInitializedRef.current) return;
     isInitializedRef.current = true;
 
+    const supabase = createBrowserClient();
+
     const initAuth = async () => {
       try {
         const userData = await authApi.getCurrentUser();
@@ -54,7 +58,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     initAuth();
-  }, []);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
+        setUser(null);
+        const currentPath = window.location.pathname;
+        if (!currentPath.startsWith('/login') && !currentPath.startsWith('/register')) {
+          router.push('/login');
+        }
+      } else if (event === 'SIGNED_IN' && session) {
+        const userData = await authApi.getCurrentUser();
+        if (userData?.user) {
+          setUser({
+            id: userData.user.id,
+            email: userData.user.email,
+            full_name: userData.user.full_name,
+            role: userData.user.role,
+          });
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router]);
 
   const getRedirectPath = (role: UserRole): string => {
     return roleRoutes[role] ?? '/carrito';
@@ -76,11 +104,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       const result = await authApi.register(email, password, fullName);
-      if (result.user) {
-        const role = (result.user.role ?? 'cliente') as UserRole;
-        router.push(roleRoutes[role] ?? '/carrito');
+      if (result.success) {
+        toast.success(result.message || 'Cuenta creada. Inicia sesión.');
+        router.push('/login');
+        return { error: null };
       }
-      return { error: null };
+      return { error: result.error || 'Registration failed' };
     } catch (error) {
       return { error: error instanceof Error ? error.message : 'Registration failed' };
     }

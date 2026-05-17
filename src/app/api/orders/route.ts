@@ -146,6 +146,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: unavailableItems.join(', '), available: false }, { status: 400 });
     }
 
+    const stockResults: { productId: string; quantity: number }[] = [];
+
+    for (const item of items) {
+      const { data: success, error: rpcError } = await supabase.rpc('decrement_stock', {
+        p_product_id: item.productId,
+        p_quantity: item.quantity
+      });
+
+      if (rpcError || !success) {
+        for (const stockItem of stockResults) {
+          await supabase.rpc('increment_stock', {
+            p_product_id: stockItem.productId,
+            p_quantity: stockItem.quantity
+          });
+        }
+        return NextResponse.json({ error: `Stock insuficiente para ${item.productName}` }, { status: 400 });
+      }
+
+      stockResults.push({ productId: item.productId, quantity: item.quantity });
+    }
+
+    const rollbackStock = async () => {
+      for (const stockItem of stockResults) {
+        await supabase.rpc('increment_stock', {
+          p_product_id: stockItem.productId,
+          p_quantity: stockItem.quantity
+        });
+      }
+    };
+
     const orderItems: Omit<OrderItemRow, 'order_id'>[] = items.map((item: OrderItemInput) => ({
       product_id: item.productId,
       product_name: item.productName,
@@ -179,6 +209,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError) {
+      await rollbackStock();
       return NextResponse.json({ error: orderError.message }, { status: 500 });
     }
 
@@ -190,6 +221,7 @@ export async function POST(request: NextRequest) {
 
     if (itemsError) {
       await supabase.from('orders').delete().eq('id', order.id);
+      await rollbackStock();
       return NextResponse.json({ error: itemsError.message }, { status: 500 });
     }
 

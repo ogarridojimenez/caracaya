@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth, isAdmin } from '@/lib/auth/helpers';
 
 export async function GET(
   request: NextRequest,
@@ -27,16 +28,20 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createServerSupabaseClient();
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const authResult = await withAuth(request, ['manager_admin']);
+
+  if ('error' in authResult) {
+    return authResult.error;
+  }
+
+  const { success } = authResult;
+  if (!isAdmin(success.role)) {
+    return NextResponse.json({ error: 'Forbidden: Solo administradores pueden modificar productos' }, { status: 403 });
   }
 
   const body = await request.json();
-  
-  const { data, error } = await supabase
+
+  const { data, error } = await success.supabase
     .from('products')
     .update(body)
     .eq('id', params.id)
@@ -54,14 +59,18 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createServerSupabaseClient();
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const authResult = await withAuth(request, ['manager_admin']);
+
+  if ('error' in authResult) {
+    return authResult.error;
   }
 
-  const { error } = await supabase
+  const { success } = authResult;
+  if (!isAdmin(success.role)) {
+    return NextResponse.json({ error: 'Forbidden: Solo administradores pueden eliminar productos' }, { status: 403 });
+  }
+
+  const { error } = await success.supabase
     .from('products')
     .delete()
     .eq('id', params.id);

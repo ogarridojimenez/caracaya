@@ -2,7 +2,37 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+const rateLimitMap = new Map<string, { count: number; timestamp: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const windowMs = 60 * 1000;
+  const limit = 5;
+
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now - record.timestamp > windowMs) {
+    rateLimitMap.set(ip, { count: 1, timestamp: now });
+    return false;
+  }
+
+  if (record.count >= limit) {
+    return true;
+  }
+
+  record.count++;
+  return false;
+}
+
 export async function middleware(req: NextRequest) {
+  if (req.nextUrl.pathname === '/api/auth/login') {
+    const ip = req.ip ?? 'unknown';
+
+    if (isRateLimited(ip)) {
+      return new NextResponse('Too many requests', { status: 429 });
+    }
+  }
+
   const response = NextResponse.next({
     request: {
       headers: req.headers,
@@ -26,20 +56,20 @@ export async function middleware(req: NextRequest) {
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { pathname } = req.nextUrl;
 
   const publicRoutes = ['/', '/login', '/register', '/products', '/api/auth'];
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
-  if (!session && !isPublicRoute) {
+  if (!user && !isPublicRoute) {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
-  if (session && (pathname === '/login' || pathname === '/register')) {
+  if (user && (pathname === '/login' || pathname === '/register')) {
     const url = req.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);
@@ -48,7 +78,7 @@ export async function middleware(req: NextRequest) {
   const { data: userData } = await supabase
     .from('users')
     .select('role')
-    .eq('id', session?.user?.id)
+    .eq('id', user?.id)
     .single();
 
   const role = userData?.role ?? 'cliente';

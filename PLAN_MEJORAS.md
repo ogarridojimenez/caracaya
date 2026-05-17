@@ -236,5 +236,227 @@
 
 ---
 
+## CORRECCIONES CRÍTICAS - Code Review
+
+### SEGURIDAD (CRÍTICO - Corregir antes de producción)
+
+#### S1: APIs sin autenticación
+**Archivos:** `src/app/api/orders/summary/route.ts`, `src/app/api/orders/daily/route.ts`, `src/app/api/products/route.ts`
+
+**Problema:** Rutas expuestas sin check de auth - cualquier usuario puede acceder a datos financieros y crear productos.
+
+**Cambios:**
+- Agregar `getUser()` al inicio de GET /summary y GET /daily
+- Agregar role check en POST /products (solo admin)
+- Agregar role check en PATCH/DELETE /products/[id] (solo admin)
+
+---
+
+#### S2: CSV Injection
+**Archivo:** `src/app/api/reports/export/route.ts:28-39`
+
+**Problema:** Nombres de usuarios injectados en CSV pueden ejecutar fórmulas maliciosas en Excel.
+
+**Cambios:**
+- Sanitizar celdas que empiezan con `=`, `+`, `-`, `@`, `\t` con prefijo `'`
+
+---
+
+#### S3: Order Status sin autorización
+**Archivo:** `src/app/api/orders/[id]/route.ts:69-78`
+
+**Problema:** Cualquier usuario puede cambiar status de cualquier pedido.
+
+**Cambios:**
+- Agregar check: solo staff (vendedor/manager_admin) puede avanzar status
+- Solo owner o staff puede cancelar
+
+---
+
+#### S4: Race condition en stock
+**Archivo:** `src/app/api/orders/route.ts:124-194`
+
+**Problema:** Dos pedidos simultáneos pueden consumir el mismo stock.
+
+**Cambios:**
+- Usar transacción de base de datos con row-level locking
+- O usar RPC de Supabase para decremento atómico
+
+---
+
+#### S5: Rate Limiter inútil en producción
+**Archivo:** `src/lib/rate-limit.ts`
+
+**Problema:** Map in-memory no funciona en serverless/Vercel (instancias separadas).
+
+**Cambios:**
+- Migrar a Redis o Upstash para rate limiting real
+- Agregar cleanup de entradas expiradas
+
+---
+
+#### S6: SSE sin autenticación
+**Archivo:** `src/app/api/notifications/stream/route.ts`
+
+**Problema:** Cualquiera puede recibir notificaciones de pedidos en tiempo real.
+
+**Cambios:**
+- Agregar auth check antes de establecer stream
+
+---
+
+### BUGS DE PRODUCCIÓN (ALTO - Corregir pronto)
+
+#### B1: Image upload no funciona
+**Archivo:** `src/features/products/components/ProductFormModal.tsx:68-109`
+
+**Problema:** El usuario selecciona imagen pero nunca se sube.
+
+**Cambios:**
+- Implementar upload de imagen antes de crear producto
+- Usar returned URL en el mutation
+
+---
+
+#### B2: daily-closes POST no existe
+**Archivo:** `src/app/api/daily-closes/route.ts`
+
+**Problema:** Frontend POSTea pero no hay handler - 405 Method Not Allowed.
+
+**Cambios:**
+- Agregar POST handler para crear daily closes
+
+---
+
+#### B3: categories API no envía cookies
+**Archivo:** `src/lib/api/categories.ts:6`
+
+**Problema:** `credentials: 'include'` faltante - 401 en requests.
+
+**Cambios:**
+- Agregar credentials a fetch options
+
+---
+
+#### B4: Auth no detecta cambios de sesión
+**Archivo:** `src/features/auth/hooks/use-auth.tsx:31-57`
+
+**Problema:** Expiración de sesión no se detecta - usuario queda en estado zombie.
+
+**Cambios:**
+- Usar `supabase.auth.onAuthStateChange()` para escuchar cambios
+
+---
+
+#### B5: Register redirige sin verificar email
+**Archivo:** `src/features/auth/hooks/use-auth.tsx:76-86`
+
+**Problema:** Redirige antes de confirmar que email fue verificado.
+
+**Cambios:**
+- Verificar `data.session` antes de redirigir
+
+---
+
+#### B6: useNotifications reconnect loop
+**Archivo:** `src/hooks/use-notifications.ts:38-42`
+
+**Problema:** Reconexión infinita en errores - consume recursos.
+
+**Cambios:**
+- Agregar exponential backoff con max retries
+
+---
+
+### CALIDAD DE CÓDIGO (MEDIO - Mantenimiento)
+
+#### C1: Código duplicado
+**Problema:** `isStaff` en 3 archivos, `statusConfig` en 4+ archivos.
+
+**Cambios:**
+- Consolidar `isStaff` en `src/lib/auth/helpers.ts`
+- Consolidar `statusConfig` en `src/domain/types/config.ts`
+
+---
+
+#### C2: Tipos `any` excesivos
+**Archivos:** contabilidad, admin, pedidos usan `any[]`
+
+**Cambios:**
+- Reemplazar con tipos de `src/domain/types/database.ts`
+
+---
+
+#### C3: Landing page sin Tailwind
+**Archivo:** `src/app/page.tsx` (413 líneas inline styles)
+
+**Cambios:**
+- Convertir a componentes Tailwind (ver Nivel 4.1)
+
+---
+
+#### C4: Código muerto
+**Archivos:** `use-translations.ts`, `use-service-worker.ts`, next-intl sin usar
+
+**Cambios:**
+- Eliminar o integrar los hooks
+
+---
+
+#### C5: Character chino en error boundary
+**Archivo:** `src/components/error-boundary.tsx:46`
+
+**Cambios:**
+- Cambiar `发生` por texto correcto en español
+
+---
+
+#### C6: /usuarios accesible sin rol admin
+**Archivo:** `src/app/(dashboard)/usuarios/page.tsx`
+
+**Cambios:**
+- Mover a `/admin/usuarios` o agregar role check
+
+---
+
+### MEJORAS MENORES (BAJO)
+
+- Eliminar `eslint.config.mjs` (usar solo `.eslintrc.json`)
+- Agregar security headers en `next.config.js`
+- Crear `manifest.json` o eliminar referencia
+- Agregar `loading="lazy"` a imágenes below-the-fold
+
+---
+
+## Orden de Implementación Sugerido
+
+### Semana 1: Seguridad Crítica
+1. S1 - APIs sin auth
+2. S3 - Order status authorization
+3. S2 - CSV injection
+
+### Semana 2: Bugs de Producción
+4. B1 - Image upload
+5. B2 - daily-closes POST
+6. B3 - categories credentials
+7. B4 - Auth state listener
+8. S6 - SSE auth
+
+### Semana 3: Arquitectura y Calidad
+9. S4 - Race condition stock (transacciones)
+10. C1 - Código duplicado
+11. C2 - Tipos any
+12. C5 - Error boundary
+
+### Semana 4: Refinamiento
+13. S5 - Rate limiter Redis
+14. B5 - Register flow
+15. B6 - Reconnect backoff
+16. C3 - Landing Tailwind
+17. C4 - Código muerto
+18. C6 - /usuarios protection
+
+---
+
 *Documento actualizado: 2026-05-16*
-*Estado: FASE 1-5 completadas, nuevas mejoras propuestas*
+*Estado: FASE 1-5 completadas + Code Review Corrections añadidas*
