@@ -80,8 +80,9 @@ export function CartDrawer() {
                         <button
                           onClick={() => removeItem(item.product.id)}
                           className="ml-auto p-1 text-red-500 hover:bg-red-50 rounded"
+                          aria-label={`Eliminar ${item.product.name} del carrito`}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
                         </button>
                       </div>
                     </div>

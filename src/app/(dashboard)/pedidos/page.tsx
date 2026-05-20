@@ -286,8 +286,10 @@ export default function PedidosPage() {
               onClick={() => setSoundEnabled(!soundEnabled)}
               className={`p-2 rounded ${soundEnabled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}
               title={soundEnabled ? 'Sonido activado' : 'Sonido desactivado'}
+              aria-label={soundEnabled ? 'Desactivar sonido' : 'Activar sonido'}
+              aria-pressed={soundEnabled}
             >
-              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              {soundEnabled ? <Volume2 className="h-4 w-4" aria-hidden="true" /> : <VolumeX className="h-4 w-4" aria-hidden="true" />}
             </button>
           )}
         </div>
@@ -296,13 +298,16 @@ export default function PedidosPage() {
       {isStaffUser && (
         <div className="bg-white rounded-xl shadow p-3 mb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden="true" />
+            <label htmlFor="search-orders" className="sr-only">Buscar pedidos</label>
             <input
+              id="search-orders"
               type="text"
               placeholder="Buscar por pedido, cliente o producto..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
+              aria-label="Buscar por pedido, cliente o producto"
             />
           </div>
         </div>

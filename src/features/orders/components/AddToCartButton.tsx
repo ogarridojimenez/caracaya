@@ -33,9 +33,10 @@ export function AddToCartButton({ product, className = '' }: AddToCartButtonProp
       <button
         className={`p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors ${className}`}
         title="Agregar al carrito"
+        aria-label={`Agregar ${product.name} al carrito`}
         disabled
       >
-        <Plus className="h-5 w-5" />
+        <Plus className="h-5 w-5" aria-hidden="true" />
       </button>
     );
   }
@@ -45,8 +46,9 @@ export function AddToCartButton({ product, className = '' }: AddToCartButtonProp
       onClick={handleAdd}
       className={`p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors ${className}`}
       title="Agregar al carrito"
+      aria-label={`Agregar ${product.name} al carrito`}
     >
-      <Plus className="h-5 w-5" />
+      <Plus className="h-5 w-5" aria-hidden="true" />
     </button>
   );
 }

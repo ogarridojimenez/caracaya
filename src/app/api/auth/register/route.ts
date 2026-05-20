@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: false, error: 'Error al crear usuario' }, { status: 400 });
   } catch (err) {
-    console.error('[API/auth/register] Error:', err);
+    console.error('[API/auth/register] Error:', err instanceof Error ? err.message : 'Unknown error');
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { withAuth } from '@/lib/auth/helpers';
+import { validateBody, dailyCloseSchema } from '@/lib/validations';
 
 interface DailyCloseItem {
   total_price: number;
@@ -84,20 +85,17 @@ export async function POST(request: NextRequest) {
 
   const { supabase, userId } = auth.success;
 
-  const body = await request.json();
+  const validation = await validateBody(request, dailyCloseSchema);
+  if (!validation.success) return validation.error;
 
-  const { close_date, total_amount, notes } = body;
-
-  if (!close_date) {
-    return NextResponse.json({ error: 'close_date es requerido' }, { status: 400 });
-  }
+  const { date, total_sales, notes } = validation.data;
 
   const { data, error } = await supabase
     .from('daily_closes')
     .insert({
-      close_date,
-      total_amount: total_amount ?? 0,
-      subtotal: total_amount ?? 0,
+      close_date: date,
+      total_amount: total_sales,
+      subtotal: total_sales,
       notes: notes ?? '',
       user_id: userId,
     })

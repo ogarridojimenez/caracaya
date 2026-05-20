@@ -1,4 +1,4 @@
-const CACHE_NAME = 'caracaya-v1';
+const CACHE_NAME = 'caraballo-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',

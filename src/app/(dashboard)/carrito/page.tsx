@@ -3,10 +3,11 @@
 import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useProducts } from '@/features/products/hooks';
+import { useCategories } from '@/features/products/hooks/use-categories';
 import { AddToCartButton } from '@/features/orders/components';
 import { ShoppingBag, Search } from 'lucide-react';
 import { useCartStore } from '@/store';
-import type { Product } from '@/domain/types/database';
+import type { Product, Category } from '@/domain/types/database';
 import { SkeletonProductCard } from '@/components/ui/skeleton';
 import { useDebounce } from '@/hooks/use-debounce';
 
@@ -14,7 +15,9 @@ export default function CarritoPage() {
   const [mounted, setMounted] = useState(false);
   const { _hasHydrated } = useCartStore();
   const { data, isLoading, error } = useProducts();
+  const { data: categories } = useCategories();
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
@@ -25,9 +28,10 @@ export default function CarritoPage() {
   const filteredProducts = useMemo(() => {
     return products.filter((p: Product) => {
       const matchesSearch = p.name.toLowerCase().includes(debouncedSearch.toLowerCase());
-      return matchesSearch && p.is_available;
+      const matchesCategory = !selectedCategory || p.category_id === selectedCategory;
+      return matchesSearch && matchesCategory && p.is_available;
     });
-  }, [products, debouncedSearch]);
+  }, [products, debouncedSearch, selectedCategory]);
 
   if (!mounted) {
     return (
@@ -75,17 +79,47 @@ export default function CarritoPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Menú</h1>
 
-        <div className="flex gap-4 mt-4">
+        <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden="true" />
+            <label htmlFor="search-products" className="sr-only">Buscar productos</label>
             <input
+              id="search-products"
               type="text"
               placeholder="Buscar productos..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+              aria-label="Buscar productos"
             />
           </div>
+          {categories && categories.length > 0 && (
+            <div className="flex gap-2 flex-wrap" role="group" aria-label="Filtrar por categoría">
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                  !selectedCategory
+                    ? 'bg-amber-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Todos
+              </button>
+              {categories.map((cat: Category) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                    selectedCategory === cat.id
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

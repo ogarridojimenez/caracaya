@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /vendedor/
+Disallow: /contabilidad/
+Disallow: /perfil/
+Disallow: /pedidos/
+Disallow: /carrito/
+
+Sitemap: https://caraballo.vercel.app/sitemap.xml

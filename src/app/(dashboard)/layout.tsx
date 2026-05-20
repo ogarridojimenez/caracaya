@@ -144,15 +144,16 @@ function DashboardNav({ children }: { children: React.ReactNode }) {
                   <p style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{user.full_name || user.email}</p>
                   <span style={roleBadge(user.role)}>{user.role.replace('_', ' ')}</span>
                 </div>
-                <Link href="/perfil" style={{ padding: 8, color: '#9CA3AF', display: 'flex' }} title="Mi Perfil">
-                  <User className="h-4 w-4" />
+                <Link href="/perfil" style={{ padding: 8, color: '#9CA3AF', display: 'flex' }} title="Mi Perfil" aria-label="Mi Perfil">
+                  <User className="h-4 w-4" aria-hidden="true" />
                 </Link>
                 <button
                   onClick={() => signOut()}
                   style={{ padding: 8, color: '#9CA3AF', cursor: 'pointer', display: 'flex' }}
                   title="Cerrar sesión"
+                  aria-label="Cerrar sesión"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
 
@@ -161,8 +162,10 @@ function DashboardNav({ children }: { children: React.ReactNode }) {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="mobile-menu-btn"
                 style={{ padding: 8, color: '#6B7280', cursor: 'pointer', display: 'none' }}
+                aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+                aria-expanded={mobileMenuOpen}
               >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {mobileMenuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
               </button>
             </div>
           </div>

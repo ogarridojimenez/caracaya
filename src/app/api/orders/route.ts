@@ -212,20 +212,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Error al crear los items del pedido' }, { status: 500 });
     }
 
-    // Decrementar stock de cada producto
+    // Decrementar stock de cada producto (atómico)
     for (const item of itemsWithServerPrice) {
-      const { data: currentProduct } = await supabase
-        .from('products')
-        .select('stock_quantity')
-        .eq('id', item.product_id)
-        .single();
-
-      if (currentProduct) {
-        const newStock = Math.max(0, currentProduct.stock_quantity - item.quantity);
-        await supabase
-          .from('products')
-          .update({ stock_quantity: newStock })
-          .eq('id', item.product_id);
+      const { error: stockError } = await supabase.rpc('decrement_stock', {
+        p_product_id: item.product_id,
+        p_quantity: item.quantity,
+      });
+      if (stockError) {
+        console.error('[API/orders] Stock decrement failed:', stockError.message);
       }
     }
 
@@ -250,7 +244,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ data: fullOrder ?? order }, { status: 201 });
 
   } catch (err) {
-    console.error('[API/orders] Error:', err);
+    console.error('[API/orders] Error:', err instanceof Error ? err.message : 'Unknown error');
     if (err instanceof Error && err.message.includes('Stock insuficiente')) {
       return NextResponse.json({ error: err.message }, { status: 400 });
     }

@@ -16,13 +16,26 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://caraballo.vercel.app'),
   title: 'Caraballo - Dulces, Refrescos y Comida',
-  description: 'Sistema de pedidos para dulces, refrescos y comida',
+  description: 'Sistema de pedidos para dulces, refrescos y comida en Cafetería Caraballo. Ordena en línea y recoge sin filas.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Caraballo',
+  },
+  openGraph: {
+    title: 'Caraballo - Dulces, Refrescos y Comida',
+    description: 'Ordena en línea y recoge sin filas. Dulces, refrescos y comida.',
+    type: 'website',
+    locale: 'es_MX',
+    siteName: 'Caraballo',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Caraballo - Dulces, Refrescos y Comida',
+    description: 'Ordena en línea y recoge sin filas.',
   },
 };
 
@@ -30,7 +43,6 @@ export const viewport: Viewport = {
   themeColor: '#D97706',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({

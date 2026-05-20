@@ -179,10 +179,11 @@ export default function LandingPage() {
         <div className="grid md:grid-cols-2 gap-20 items-center">
           <div className="relative rounded-2xl overflow-hidden group">
             <div className="relative h-[500px]">
-              <Image 
-                src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=700&fit=crop" 
-                alt="Dulces" 
+              <Image
+                src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=700&fit=crop"
+                alt="Dulces"
                 fill
+                priority
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
             </div>
