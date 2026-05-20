@@ -1,33 +1,25 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { orderEvents } from '@/lib/order-events';
+import { validateBody, z } from '@/lib/validations';
 
-interface OrderItemInput {
-  productId: string;
-  productName: string;
-  quantity: number;
-  unitPrice: number;
-  notes?: string;
-}
+const orderItemInputSchema = z.object({
+  productId: z.string().uuid('ID de producto inválido'),
+  productName: z.string().min(1),
+  quantity: z.number().int().positive('Cantidad debe ser positiva'),
+  unitPrice: z.number().positive('Precio debe ser positivo'),
+  notes: z.string().max(200).optional(),
+});
 
-interface CreateOrderBody {
-  items: OrderItemInput[];
-  pickupTime?: string;
-  notes?: string;
-  subtotal: number;
-  taxAmount?: number;
-  discountAmount?: number;
-}
+const createOrderBodySchema = z.object({
+  items: z.array(orderItemInputSchema).min(1, 'Se requiere al menos un producto'),
+  pickupTime: z.string().optional(),
+  notes: z.string().max(500).optional(),
+  taxAmount: z.number().min(0).optional(),
+  discountAmount: z.number().min(0).optional(),
+});
 
-interface OrderItemRow {
-  product_id: string;
-  product_name: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-  notes: string | null;
-  order_id: string;
-}
+type OrderItemInput = z.infer<typeof orderItemInputSchema>;
 
 export async function GET(request: NextRequest) {
   const supabase = createServerSupabaseClient(request);
@@ -71,7 +63,13 @@ export async function GET(request: NextRequest) {
     .range(from, to);
 
   if (userId) {
-    query = query.eq('user_id', userId);
+    if (isStaff) {
+      query = query.eq('user_id', userId);
+    } else if (userId === user.id) {
+      query = query.eq('user_id', user.id);
+    } else {
+      return NextResponse.json({ error: 'Forbidden: No puedes ver pedidos de otros usuarios' }, { status: 403 });
+    }
   } else if (userRole === 'cliente') {
     query = query.eq('user_id', user.id);
   }
@@ -113,79 +111,57 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body: CreateOrderBody = await request.json();
-    const { items, pickupTime, notes, subtotal, taxAmount, discountAmount } = body;
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ error: 'Se requiere al menos un producto' }, { status: 400 });
+    const validation = await validateBody(request, createOrderBodySchema);
+    if (!validation.success) {
+      return validation.error;
     }
 
+    const { items, pickupTime, notes, taxAmount, discountAmount } = validation.data;
+
+    // Verificar precios del servidor y calcular subtotal real
     const productIds = items.map((item: OrderItemInput) => item.productId);
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('id, name, stock_quantity, is_available')
+      .select('id, name, price, stock_quantity, is_available')
       .in('id', productIds);
 
     if (productsError) {
       return NextResponse.json({ error: 'Error al verificar productos' }, { status: 500 });
     }
 
-    const unavailableItems: string[] = [];
+    let calculatedSubtotal = 0;
+    const itemsWithServerPrice: Array<{
+      product_id: string;
+      product_name: string;
+      quantity: number;
+      unit_price: number;
+      total_price: number;
+      notes: string | null;
+    }> = [];
+
     for (const item of items) {
       const product = products?.find(p => p.id === item.productId);
       if (!product) {
-        unavailableItems.push(`${item.productName}: Producto no encontrado`);
-      } else if (!product.is_available) {
-        unavailableItems.push(`${item.productName}: No disponible`);
-      } else if (product.stock_quantity < item.quantity) {
-        unavailableItems.push(`${item.productName}: Stock insuficiente (disponible: ${product.stock_quantity})`);
+        return NextResponse.json({ error: `${item.productName}: Producto no encontrado` }, { status: 400 });
       }
-    }
-
-    if (unavailableItems.length > 0) {
-      return NextResponse.json({ error: unavailableItems.join(', '), available: false }, { status: 400 });
-    }
-
-    const stockResults: { productId: string; quantity: number }[] = [];
-
-    for (const item of items) {
-      const { data: success, error: rpcError } = await supabase.rpc('decrement_stock', {
-        p_product_id: item.productId,
-        p_quantity: item.quantity
+      if (!product.is_available) {
+        return NextResponse.json({ error: `${item.productName}: No disponible` }, { status: 400 });
+      }
+      if (product.stock_quantity < item.quantity) {
+        return NextResponse.json({ error: `${item.productName}: Stock insuficiente (disponible: ${product.stock_quantity})` }, { status: 400 });
+      }
+      calculatedSubtotal += product.price * item.quantity;
+      itemsWithServerPrice.push({
+        product_id: item.productId,
+        product_name: item.productName,
+        quantity: item.quantity,
+        unit_price: product.price,
+        total_price: product.price * item.quantity,
+        notes: item.notes || null,
       });
-
-      if (rpcError || !success) {
-        for (const stockItem of stockResults) {
-          await supabase.rpc('increment_stock', {
-            p_product_id: stockItem.productId,
-            p_quantity: stockItem.quantity
-          });
-        }
-        return NextResponse.json({ error: `Stock insuficiente para ${item.productName}` }, { status: 400 });
-      }
-
-      stockResults.push({ productId: item.productId, quantity: item.quantity });
     }
 
-    const rollbackStock = async () => {
-      for (const stockItem of stockResults) {
-        await supabase.rpc('increment_stock', {
-          p_product_id: stockItem.productId,
-          p_quantity: stockItem.quantity
-        });
-      }
-    };
-
-    const orderItems: Omit<OrderItemRow, 'order_id'>[] = items.map((item: OrderItemInput) => ({
-      product_id: item.productId,
-      product_name: item.productName,
-      quantity: item.quantity,
-      unit_price: item.unitPrice,
-      total_price: item.unitPrice * item.quantity,
-      notes: item.notes || null,
-    }));
-
-    const total = subtotal + (taxAmount ?? 0) - (discountAmount ?? 0);
+    const total = calculatedSubtotal + (taxAmount ?? 0) - (discountAmount ?? 0);
 
     let pickupTimeValue: string | null = null;
     if (pickupTime) {
@@ -193,15 +169,16 @@ export async function POST(request: NextRequest) {
       pickupTimeValue = `${today}T${pickupTime}:00`;
     }
 
+    // Crear la orden directamente (el trigger genera order_number)
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
         user_id: user.id,
         status: 'pending',
-        subtotal,
-        total,
+        subtotal: calculatedSubtotal,
         tax_amount: taxAmount ?? 0,
         discount_amount: discountAmount ?? 0,
+        total,
         pickup_time: pickupTimeValue,
         notes: notes || null,
       })
@@ -209,41 +186,74 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError) {
-      await rollbackStock();
-      return NextResponse.json({ error: orderError.message }, { status: 500 });
+      console.error('[API/orders] Order creation failed:', orderError.message);
+      return NextResponse.json({ error: 'Error al crear el pedido' }, { status: 500 });
     }
 
-    const itemsToInsert: OrderItemRow[] = orderItems.map(item => ({ ...item, order_id: order.id }));
+    // Crear los items de la orden
+    const orderItems = itemsWithServerPrice.map(item => ({
+      order_id: order.id,
+      product_id: item.product_id,
+      product_name: item.product_name,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      total_price: item.total_price,
+      notes: item.notes,
+    }));
 
     const { error: itemsError } = await supabase
       .from('order_items')
-      .insert(itemsToInsert);
+      .insert(orderItems);
 
     if (itemsError) {
+      console.error('[API/orders] Order items creation failed:', itemsError.message);
+      // Intentar eliminar la orden huérfana
       await supabase.from('orders').delete().eq('id', order.id);
-      await rollbackStock();
-      return NextResponse.json({ error: itemsError.message }, { status: 500 });
+      return NextResponse.json({ error: 'Error al crear los items del pedido' }, { status: 500 });
     }
 
-    const { data: orderWithItems } = await supabase
+    // Decrementar stock de cada producto
+    for (const item of itemsWithServerPrice) {
+      const { data: currentProduct } = await supabase
+        .from('products')
+        .select('stock_quantity')
+        .eq('id', item.product_id)
+        .single();
+
+      if (currentProduct) {
+        const newStock = Math.max(0, currentProduct.stock_quantity - item.quantity);
+        await supabase
+          .from('products')
+          .update({ stock_quantity: newStock })
+          .eq('id', item.product_id);
+      }
+    }
+
+    // Consultar la orden completa con items para la respuesta
+    const { data: fullOrder } = await supabase
       .from('orders')
-      .select('*, order_items(*), user:users(full_name)')
+      .select('*, order_items(*)')
       .eq('id', order.id)
       .single();
 
+    // Emitir evento SSE
     orderEvents.emit({
       orderId: order.id,
       orderNumber: order.order_number,
-      customerName: orderWithItems?.user?.full_name ?? 'Cliente',
+      customerName: 'Cliente',
       status: order.status,
       total: order.total,
-      items: orderItems.length,
+      items: itemsWithServerPrice.length,
       createdAt: new Date().toISOString()
     });
 
-    return NextResponse.json({ data: orderWithItems }, { status: 201 });
+    return NextResponse.json({ data: fullOrder ?? order }, { status: 201 });
 
-  } catch {
+  } catch (err) {
+    console.error('[API/orders] Error:', err);
+    if (err instanceof Error && err.message.includes('Stock insuficiente')) {
+      return NextResponse.json({ error: err.message }, { status: 400 });
+    }
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 }

@@ -12,6 +12,8 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import type { OrderStatus } from '@/domain/types/database';
 
+const isStaff = (role: string) => role === 'vendedor' || role === 'manager_admin';
+
 const statusConfig: Record<OrderStatus, { label: string; color: string; bgColor: string }> = {
   pending: { label: 'Pendiente', color: 'text-yellow-800', bgColor: 'bg-yellow-100' },
   confirmed: { label: 'Confirmado', color: 'text-blue-800', bgColor: 'bg-blue-100' },
@@ -22,8 +24,6 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; bgColor:
 };
 
 const STATUS_COLORS = ['#f59e0b', '#3b82f6', '#f97316', '#22c55e', '#6b7280', '#ef4444'];
-
-const isStaff = (role: string) => role === 'vendedor' || role === 'manager_admin';
 
 const timeRanges = [
   { label: 'Hoy', days: 0 },
@@ -165,7 +165,7 @@ export default function DashboardVendedor() {
             <div>
               <p className="text-sm text-gray-500">Ticket promedio</p>
               <p className="text-3xl font-bold text-blue-600">
-                ${filteredOrders.length > 0 ? (totalRevenue / filteredOrders.filter(o => o.status === 'completed').length).toFixed(2) : '0.00'}
+                ${(() => { const completedCount = filteredOrders.filter(o => o.status === 'completed').length; return completedCount > 0 ? (totalRevenue / completedCount).toFixed(2) : '0.00'; })()}
               </p>
             </div>
             <TrendingUp className="h-10 w-10 text-blue-600 opacity-50" />

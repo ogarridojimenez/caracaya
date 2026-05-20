@@ -4,14 +4,14 @@ import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/features/auth/hooks';
 import { CartDrawer, CheckoutModal } from '@/features/orders/components';
 import Link from 'next/link';
-import { Cake, ShoppingBag, LogOut, Package, LayoutDashboard, Users, Tags, DollarSign, BarChart3, Grid3X3, Menu, X, User, ChevronDown } from 'lucide-react';
+import { Cake, ShoppingBag, LogOut, Package, LayoutDashboard, Users, Tags, DollarSign, BarChart3, Grid3X3, Menu, X, User, ChevronDown, LucideIcon } from 'lucide-react';
 import type { UserRole } from '@/domain/types/database';
 import { usePathname } from 'next/navigation';
 
 interface NavItem {
   href: string;
   label: string;
-  icon: any;
+  icon: LucideIcon;
 }
 
 const navItemsByRole: Record<UserRole, NavItem[]> = {
@@ -106,7 +106,7 @@ function DashboardNav({ children }: { children: React.ReactNode }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
               <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Cake className="h-6 w-6 text-amber-600" />
-                <span style={{ fontWeight: 700, fontSize: 18, color: '#111827' }}>Caracaya</span>
+                <span style={{ fontWeight: 700, fontSize: 18, color: '#111827' }}>Caraballo</span>
               </Link>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="desktop-nav">

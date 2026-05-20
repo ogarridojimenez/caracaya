@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { withAuth, isAdmin } from '@/lib/auth/helpers';
+import { validateBody, productUpdateSchema } from '@/lib/validations';
 
 export async function GET(
   request: NextRequest,
@@ -10,7 +11,7 @@ export async function GET(
   
   const { data, error } = await supabase
     .from('products')
-    .select('*')
+    .select('id, name, description, price, category_id, image_url, is_available, is_featured, stock_quantity, preparation_time_minutes, cost, low_stock_threshold, created_at, updated_at')
     .eq('id', params.id)
     .single();
 
@@ -18,7 +19,8 @@ export async function GET(
     if (error.code === 'PGR116') {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[API/products GET by id]', error.message);
+    return NextResponse.json({ error: 'Error al obtener producto' }, { status: 500 });
   }
 
   return NextResponse.json({ data });
@@ -39,11 +41,14 @@ export async function PATCH(
     return NextResponse.json({ error: 'Forbidden: Solo administradores pueden modificar productos' }, { status: 403 });
   }
 
-  const body = await request.json();
+  const validation = await validateBody(request, productUpdateSchema);
+  if (!validation.success) {
+    return validation.error;
+  }
 
   const { data, error } = await success.supabase
     .from('products')
-    .update(body)
+    .update(validation.data)
     .eq('id', params.id)
     .select()
     .single();

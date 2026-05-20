@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/features/auth/hooks';
-import { User, Mail, Lock, Save, AlertCircle, CheckCircle, Upload } from 'lucide-react';
+import { User, Mail, Lock, Save, AlertCircle, CheckCircle } from 'lucide-react';
 import { ImageUpload } from '@/components/image-upload';
 
 interface UserData {
@@ -113,81 +114,54 @@ export default function ProfilePage() {
 
   const roleLabel = userData?.role === 'manager_admin' ? 'Administrador' : userData?.role === 'vendedor' ? 'Vendedor' : 'Cliente';
 
+  const roleBgColor = userData?.role === 'manager_admin' ? 'bg-purple-100 text-purple-800' : userData?.role === 'vendedor' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800';
+
   return (
     <div className="max-w-2xl mx-auto">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+      <div className="flex items-center gap-2 mb-6">
         <User className="h-6 w-6 text-amber-600" />
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>Mi Perfil</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Mi Perfil</h1>
       </div>
 
       {message && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: 12,
-          borderRadius: 8,
-          marginBottom: 16,
-          backgroundColor: message.type === 'success' ? '#ECFDF5' : '#FEF2F2',
-          color: message.type === 'success' ? '#065F46' : '#991B1B',
-        }}>
+        <div className={`flex items-center gap-2 p-3 rounded-lg mb-4 ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
           {message.type === 'success' ? <CheckCircle className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
           {message.text}
         </div>
       )}
 
-      <div style={{ backgroundColor: 'white', borderRadius: 12, padding: 24, marginBottom: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ fontSize: 16, fontWeight: 600, color: '#374151', marginBottom: 16 }}>Información Personal</h2>
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <h2 className="text-base font-semibold text-gray-700 mb-4">Información Personal</h2>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Avatar" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }} />
+              <Image src={avatarUrl} alt="Avatar" width={80} height={80} className="rounded-full object-cover" />
             ) : (
-              <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#F59E0B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="w-20 h-20 rounded-full bg-amber-500 flex items-center justify-center">
                 <User className="h-8 w-8 text-white" />
               </div>
             )}
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#6B7280', marginBottom: 6 }}>Foto de perfil</label>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-500 mb-1">Foto de perfil</label>
               <ImageUpload value={avatarUrl} onChange={setAvatarUrl} />
             </div>
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#6B7280', marginBottom: 6 }}>Nombre completo</label>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Nombre completo</label>
+            <div className="flex gap-2">
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: '10px 12px',
-                  border: '1px solid #D1D5DB',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  outline: 'none',
-                }}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
                 placeholder="Tu nombre"
               />
               <button
                 onClick={handleSaveName}
                 disabled={saving}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '10px 16px',
-                  backgroundColor: '#F59E0B',
-                  color: 'white',
-                  borderRadius: 8,
-                  fontWeight: 500,
-                  fontSize: 14,
-                  border: 'none',
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                  opacity: saving ? 0.5 : 1,
-                }}
+                className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white rounded-lg font-medium text-sm hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save className="h-4 w-4" />
                 Guardar
@@ -196,89 +170,60 @@ export default function ProfilePage() {
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#6B7280', marginBottom: 6 }}>Correo electrónico</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Correo electrónico</label>
+            <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-gray-400" />
-              <span style={{ fontSize: 14, color: '#374151' }}>{userData?.email}</span>
+              <span className="text-sm text-gray-700">{userData?.email}</span>
             </div>
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#6B7280', marginBottom: 6 }}>Rol</label>
-            <span style={{
-              display: 'inline-block',
-              padding: '4px 12px',
-              borderRadius: 20,
-              fontSize: 12,
-              fontWeight: 500,
-              backgroundColor: userData?.role === 'manager_admin' ? '#F3E8FF' : userData?.role === 'vendedor' ? '#DCFCE7' : '#DBEAFE',
-              color: userData?.role === 'manager_admin' ? '#6B21A8' : userData?.role === 'vendedor' ? '#166534' : '#1E40AF',
-            }}>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Rol</label>
+            <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${roleBgColor}`}>
               {roleLabel}
             </span>
           </div>
         </div>
       </div>
 
-      <div style={{ backgroundColor: 'white', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ fontSize: 16, fontWeight: 600, color: '#374151', marginBottom: 16 }}>
-          <Lock className="h-4 w-4 inline mr-2" style={{ display: 'inline', marginRight: 8 }} />
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+          <Lock className="h-4 w-4" />
           Cambiar Contraseña
         </h2>
 
-        <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <form onSubmit={handleChangePassword} className="flex flex-col gap-3">
           <div>
-            <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#6B7280', marginBottom: 6 }}>Contraseña actual</label>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Contraseña actual</label>
             <input
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #D1D5DB',
-                borderRadius: 8,
-                fontSize: 14,
-                outline: 'none',
-              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
               placeholder="Ingresa tu contraseña actual"
               required
             />
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#6B7280', marginBottom: 6 }}>Nueva contraseña</label>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Nueva contraseña</label>
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #D1D5DB',
-                borderRadius: 8,
-                fontSize: 14,
-                outline: 'none',
-              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
               placeholder="Mínimo 6 caracteres"
               required
             />
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#6B7280', marginBottom: 6 }}>Confirmar nueva contraseña</label>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Confirmar nueva contraseña</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #D1D5DB',
-                borderRadius: 8,
-                fontSize: 14,
-                outline: 'none',
-              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
               placeholder="Repite la nueva contraseña"
               required
             />
@@ -287,21 +232,7 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            style={{
-              alignSelf: 'flex-start',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '10px 20px',
-              backgroundColor: '#1F2937',
-              color: 'white',
-              borderRadius: 8,
-              fontWeight: 500,
-              fontSize: 14,
-              border: 'none',
-              cursor: saving ? 'not-allowed' : 'pointer',
-              opacity: saving ? 0.5 : 1,
-            }}
+            className="self-start flex items-center gap-1.5 px-5 py-2 bg-gray-800 text-white rounded-lg font-medium text-sm hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Lock className="h-4 w-4" />
             {saving ? 'Guardando...' : 'Cambiar Contraseña'}

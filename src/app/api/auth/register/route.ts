@@ -1,11 +1,23 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { validateBody, z } from '@/lib/validations';
+
+const registerSchema = z.object({
+  email: z.string().email('Email inválido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  fullName: z.string().min(1, 'El nombre es requerido').max(100),
+  phone: z.string().max(20).optional(),
+});
 
 export async function POST(request: NextRequest) {
   try {
+    const validation = await validateBody(request, registerSchema);
+    if (!validation.success) {
+      return validation.error;
+    }
+
+    const { email, password, fullName, phone } = validation.data;
     const supabase = createServerSupabaseClient(request);
-    const body = await request.json();
-    const { email, password, fullName } = body;
 
     const { data: existingUser } = await supabase
       .from('users')
@@ -29,7 +41,8 @@ export async function POST(request: NextRequest) {
       if (error.message.includes('already exists')) {
         return NextResponse.json({ error: 'Este correo ya está registrado. Usa iniciar sesión.' }, { status: 400 });
       }
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      console.error('[API/auth/register] Supabase error:', error.message);
+      return NextResponse.json({ error: 'Error al crear la cuenta. Intenta de nuevo.' }, { status: 400 });
     }
 
     if (data.user) {
@@ -37,6 +50,7 @@ export async function POST(request: NextRequest) {
         id: data.user.id,
         email,
         full_name: fullName,
+        phone: phone || null,
         role: 'cliente',
       }, { onConflict: 'id' });
 
@@ -48,6 +62,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: false, error: 'Error al crear usuario' }, { status: 400 });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error('[API/auth/register] Error:', err);
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

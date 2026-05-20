@@ -1,4 +1,4 @@
-# Plan de Mejoras - Caracaya App
+# Plan de Mejoras - Caraballo App
 
 ## Estado: ✅ FASE 1-5 COMPLETADAS
 

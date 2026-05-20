@@ -1,13 +1,16 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth } from '@/lib/auth/helpers';
+
+interface OrderSummary {
+  status: string;
+  total: number;
+}
 
 export async function GET(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request, ['manager_admin', 'vendedor']);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const { supabase } = auth.success;
 
   const { searchParams } = new URL(request.url);
   const startDate = searchParams.get('startDate');
@@ -30,11 +33,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const completed = data.filter((o: any) => o.status === 'completed');
-  const cancelled = data.filter((o: any) => o.status === 'cancelled');
+  const completed = (data ?? []).filter((o: OrderSummary) => o.status === 'completed');
+  const cancelled = (data ?? []).filter((o: OrderSummary) => o.status === 'cancelled');
 
-  const totalRevenue = completed.reduce((sum: number, o: any) => sum + o.total, 0);
-  const totalRefunds = cancelled.reduce((sum: number, o: any) => sum + o.total, 0);
+  const totalRevenue = completed.reduce((sum: number, o: OrderSummary) => sum + o.total, 0);
+  const totalRefunds = cancelled.reduce((sum: number, o: OrderSummary) => sum + o.total, 0);
 
   return NextResponse.json({
     total_orders: completed.length,

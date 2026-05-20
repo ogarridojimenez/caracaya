@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Upload, X, Image as ImageIcon, Loader } from 'lucide-react';
 
 interface ImageUploadProps {
@@ -69,7 +70,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
   if (value) {
     return (
       <div style={{ position: 'relative', display: 'inline-block' }}>
-        <img src={value} alt="Preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 8 }} />
+        <Image src={value} alt="Preview" fill style={{ objectFit: 'cover', borderRadius: 8 }} />
         <button
           onClick={clearImage}
           style={{

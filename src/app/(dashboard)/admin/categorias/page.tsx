@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Plus, Search, Edit2, Trash2, X, Image as ImageIcon, GripVertical } from 'lucide-react';
 import { ImageUpload } from '@/components/image-upload';
 import toast from 'react-hot-toast';
@@ -153,57 +154,57 @@ export default function AdminCategoriasPage() {
   const isOpen = showCreate || editing !== null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="flex flex-col gap-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111827' }}>Categorías</h1>
-          <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>{categories.length} categorías</p>
+          <h1 className="text-2xl font-bold text-gray-900">Categorías</h1>
+          <p className="text-sm text-gray-500">{categories.length} categorías</p>
         </div>
         <button
           onClick={() => { setShowCreate(true); setEditing(null); setForm({ name: '', description: '', image_url: '', sort_order: categories.length, is_active: true }); }}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: '#d97706', color: '#fff', borderRadius: '0.5rem', fontWeight: 500, fontSize: '0.875rem', border: 'none', cursor: 'pointer' }}
+          className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg font-medium text-sm hover:bg-amber-700"
         >
           <Plus size={16} />
           Nueva Categoría
         </button>
       </div>
 
-      <div style={{ background: '#fff', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-        <div style={{ padding: '1rem', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1, maxWidth: 300 }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="p-4 border-b flex justify-between items-center">
+          <div className="relative flex-1 max-w-xs">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar categorías..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ width: '100%', paddingLeft: '2.5rem', padding: '0.5rem 0.75rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem' }}
+              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm"
             />
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="text-xs text-gray-400 flex items-center gap-1">
             <GripVertical size={14} />
             <span>Arrastra para reordenar</span>
           </div>
         </div>
 
         {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#9ca3af' }}>Cargando...</div>
+          <div className="p-8 text-center text-gray-400">Cargando...</div>
         ) : filtered.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#9ca3af' }}>No se encontraron categorías</div>
+          <div className="p-8 text-center text-gray-400">No se encontraron categorías</div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className="w-full">
             <thead>
-              <tr style={{ background: '#f9fafb' }}>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase', width: 50 }}>#</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase' }}>Imagen</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase' }}>Nombre</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase' }}>Descripción</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'center', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase' }}>Estado</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase' }}>Acciones</th>
+              <tr className="bg-gray-50">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-12">#</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Imagen</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((c, index) => (
+              {filtered.map((c) => (
                 <tr
                   key={c.id}
                   draggable
@@ -212,39 +213,33 @@ export default function AdminCategoriasPage() {
                   onDragLeave={handleDragLeave}
                   onDrop={e => handleDrop(e, c.id)}
                   onDragEnd={handleDragEnd}
-                  style={{
-                    borderBottom: '1px solid #f3f4f6',
-                    cursor: 'grab',
-                    background: draggedId === c.id ? '#fef3c7' : dragOverId === c.id ? '#fef9c3' : '#fff',
-                    transition: 'background 0.2s',
-                    opacity: draggedId === c.id ? 0.5 : 1,
-                  }}
+                  className={`border-b border-gray-100 cursor-grab transition-colors ${draggedId === c.id ? 'bg-yellow-50 opacity-50' : dragOverId === c.id ? 'bg-yellow-50' : 'bg-white'}`}
                 >
-                  <td style={{ padding: '0.75rem 1rem', color: '#9ca3af', fontSize: '0.75rem' }}>
-                    <GripVertical size={16} style={{ cursor: 'grab' }} />
+                  <td className="px-4 py-3 text-gray-400 text-xs">
+                    <GripVertical size={16} className="cursor-grab" />
                   </td>
-                  <td style={{ padding: '0.75rem 1rem' }}>
+                  <td className="px-4 py-3">
                     {c.image_url ? (
-                      <img src={c.image_url} alt={c.name} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: '0.5rem' }} />
+                      <Image src={c.image_url} alt={c.name} width={48} height={48} className="object-cover rounded-lg" />
                     ) : (
-                      <div style={{ width: 48, height: 48, background: '#f3f4f6', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <ImageIcon size={20} color="#9ca3af" />
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <ImageIcon size={20} className="text-gray-400" />
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#111827' }}>{c.name}</td>
-                  <td style={{ padding: '0.75rem 1rem', color: '#6b7280', fontSize: '0.875rem' }}>{c.description || '—'}</td>
-                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                    <span style={{ padding: '0.25rem 0.5rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 500, background: c.is_active ? '#dcfce7' : '#fee2e2', color: c.is_active ? '#16a34a' : '#dc2626' }}>
+                  <td className="px-4 py-3 font-medium text-gray-900">{c.name}</td>
+                  <td className="px-4 py-3 text-gray-500 text-sm">{c.description || '—'}</td>
+                  <td className="px-4 py-3 text-center">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${c.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {c.is_active ? 'Activa' : 'Inactiva'}
                     </span>
                   </td>
-                  <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                      <button onClick={() => handleEdit(c)} style={{ padding: '0.25rem', color: '#9ca3af', border: 'none', background: 'none', cursor: 'pointer' }} title="Editar">
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => handleEdit(c)} className="p-1 text-gray-400 hover:text-blue-600" title="Editar">
                         <Edit2 size={16} />
                       </button>
-                      <button onClick={() => handleDelete(c.id)} style={{ padding: '0.25rem', color: '#ef4444', border: 'none', background: 'none', cursor: 'pointer' }} title="Eliminar">
+                      <button onClick={() => handleDelete(c.id)} className="p-1 text-gray-400 hover:text-red-600" title="Eliminar">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -254,36 +249,36 @@ export default function AdminCategoriasPage() {
             </tbody>
           </table>
         )}
-        {reordering && <div style={{ padding: '0.5rem', textAlign: 'center', background: '#fef3c7', fontSize: '0.875rem', color: '#92400e' }}>Guardando orden...</div>}
+        {reordering && <div className="p-2 text-center bg-yellow-50 text-amber-800 text-sm">Guardando orden...</div>}
       </div>
 
       {isOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '1rem' }}>
-          <div style={{ background: '#fff', borderRadius: '0.75rem', boxShadow: '0 25px 50px rgba(0,0,0,0.25)', width: '100%', maxWidth: '500px', padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{editing ? 'Editar Categoría' : 'Nueva Categoría'}</h2>
-              <button onClick={() => { setEditing(null); setShowCreate(false); }} style={{ color: '#9ca3af', border: 'none', background: 'none', cursor: 'pointer' }}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-semibold">{editing ? 'Editar Categoría' : 'Nueva Categoría'}</h2>
+              <button onClick={() => { setEditing(null); setShowCreate(false); }} className="text-gray-400 hover:text-gray-600">
                 <X size={20} />
               </button>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="flex flex-col gap-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#374151', marginBottom: '0.25rem' }}>Nombre *</label>
-                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: '0.5rem', padding: '0.5rem', fontSize: '0.875rem' }} />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#374151', marginBottom: '0.25rem' }}>Descripción</label>
-                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: '0.5rem', padding: '0.5rem', fontSize: '0.875rem', minHeight: 60 }} />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm min-h-[60px]" />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#374151', marginBottom: '0.25rem' }}>Imagen de la Categoría</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Imagen de la Categoría</label>
                 <ImageUpload value={form.image_url} onChange={(url) => setForm(f => ({ ...f, image_url: url }))} />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <input type="checkbox" id="active" checked={form.is_active} onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))} />
-                <label htmlFor="active" style={{ fontSize: '0.875rem', color: '#374151' }}>Categoría activa</label>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="active" checked={form.is_active} onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))} className="rounded" />
+                <label htmlFor="active" className="text-sm text-gray-700">Categoría activa</label>
               </div>
-              <button onClick={handleSave} disabled={saving} style={{ padding: '0.5rem', background: '#d97706', color: '#fff', borderRadius: '0.5rem', fontWeight: 500, border: 'none', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>
+              <button onClick={handleSave} disabled={saving} className="py-2 bg-amber-600 text-white rounded-lg font-medium disabled:opacity-60">
                 {saving ? 'Guardando...' : editing ? 'Guardar Cambios' : 'Crear Categoría'}
               </button>
             </div>

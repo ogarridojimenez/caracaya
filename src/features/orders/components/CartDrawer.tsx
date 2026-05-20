@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store';
 import { useUIStore } from '@/store';
@@ -50,9 +51,11 @@ export function CartDrawer() {
                 {items.map((item) => (
                   <div key={item.product.id} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
                     {item.product.image_url && (
-                      <img
+                      <Image
                         src={item.product.image_url}
                         alt={item.product.name}
+                        width={64}
+                        height={64}
                         className="h-16 w-16 object-cover rounded"
                       />
                     )}

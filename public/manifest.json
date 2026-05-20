@@ -1,6 +1,6 @@
 {
-  "name": "Caracaya",
-  "short_name": "Caracaya",
+  "name": "Caraballo",
+  "short_name": "Caraballo",
   "description": "Sistema de pedidos para dulces, refrescos y comida",
   "start_url": "/",
   "display": "standalone",

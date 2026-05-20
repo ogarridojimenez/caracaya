@@ -63,9 +63,9 @@ export default function RegisterPage() {
             Ir a iniciar sesión
           </button>
           <p className="text-center mt-4 text-gray-500">
-            ¿No tienes cuenta?{' '}
-            <Link href="/register" className="text-amber-600 hover:underline font-medium">
-              Regístrate
+            ¿Ya tienes cuenta?{' '}
+            <Link href="/login" className="text-amber-600 hover:underline font-medium">
+              Inicia sesión
             </Link>
           </p>
         </div>

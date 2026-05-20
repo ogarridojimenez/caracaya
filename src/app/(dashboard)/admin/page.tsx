@@ -6,6 +6,24 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import Link from 'next/link';
 import { useOrders, useSalesSummary, useDailySales } from '@/features/orders/hooks';
 
+interface Order {
+  id: string;
+  status: string;
+  total: number;
+}
+
+interface DailyClose {
+  id: string;
+  manual_total: number;
+  total_amount: number;
+}
+
+interface DailySale {
+  date: string;
+  revenue: number;
+  order_count: number;
+}
+
 const statusConfig = [
   { status: 'pending', label: 'Pendiente', color: '#854d0e', dot: '#f59e0b' },
   { status: 'confirmed', label: 'Confirmado', color: '#1e40af', dot: '#3b82f6' },
@@ -17,10 +35,10 @@ const statusConfig = [
 
 export default function AdminDashboard() {
   const { data: ordersResponse } = useOrders();
-  const orders = ordersResponse?.data ?? [];
+  const orders: Order[] = ordersResponse?.data ?? [];
   const { data: summary } = useSalesSummary();
   const { data: dailySales } = useDailySales();
-  const [closes, setCloses] = useState<any[]>([]);
+  const [closes, setCloses] = useState<DailyClose[]>([]);
 
   useEffect(() => {
     fetch('/api/daily-closes', { credentials: 'include' })
@@ -30,117 +48,76 @@ export default function AdminDashboard() {
   }, []);
 
   const totalManual = closes.reduce((s, c) => s + (c.manual_total ?? c.total_amount ?? 0), 0);
-  const totalOnline = (orders ?? []).filter((o: any) => o.status === 'completed').reduce((s, o) => s + o.total, 0);
+  const totalOnline = orders.filter(o => o.status === 'completed').reduce((s, o) => s + o.total, 0);
   const grandTotal = totalManual + totalOnline;
 
-  const pending = (orders ?? []).filter((o: any) => o.status === 'pending' || o.status === 'confirmed');
-  const ready = (orders ?? []).filter((o: any) => o.status === 'ready');
+  const pending = orders.filter(o => o.status === 'pending' || o.status === 'confirmed');
+  const ready = orders.filter(o => o.status === 'ready');
 
   const statusCounts = statusConfig.map(cfg => ({
     ...cfg,
-    count: (orders ?? []).filter((o: any) => o.status === cfg.status).length,
+    count: orders.filter(o => o.status === cfg.status).length,
   }));
 
-  const chartData = (dailySales ?? []).slice(-14).map((d: any) => ({
+  const chartData: { date: string; ventas: number; pedidos: number }[] = (dailySales ?? []).slice(-14).map((d: DailySale) => ({
     date: new Date(d.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }),
     ventas: d.revenue,
     pedidos: d.order_count,
   }));
 
-  const cardLink = (href: string, bgColor: string, iconBg: string, Icon: any, iconColor: string, title: string, desc: string) => (
-    <Link href={href} style={{ background: '#fff', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none' }}>
-      <div style={{ padding: '0.75rem', background: iconBg, borderRadius: '0.75rem' }}>
-        <Icon size={24} color={iconColor} />
+  const StatCard = ({ title, value, icon: Icon, color, subtitle }: { title: string; value: string | number; icon: typeof DollarSign; color: string; subtitle?: React.ReactNode }) => (
+    <div className="bg-white rounded-xl shadow-sm p-5">
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="text-sm text-gray-500">{title}</p>
+          <p className={`text-2xl font-bold ${color}`}>{value}</p>
+        </div>
+        <Icon size={40} className="text-gray-300 opacity-30" />
       </div>
-      <div>
-        <h3 style={{ fontWeight: 600, color: '#111827' }}>{title}</h3>
-        <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>{desc}</p>
-      </div>
-    </Link>
+      {subtitle && <p className="text-xs text-gray-400 mt-2">{subtitle}</p>}
+    </div>
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111827' }}>Dashboard</h1>
-        <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>Resumen general de la cafetería</p>
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-sm text-gray-500">Resumen general de la cafetería</p>
       </div>
 
       {pending.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
-          <div style={{ background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.75rem', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <AlertTriangle size={24} color="#ca8a04" />
-            <div style={{ flex: 1 }}>
-              <p style={{ fontWeight: 500, color: '#713f12' }}>{pending.length} pedidos pendientes</p>
-              <p style={{ fontSize: '0.875rem', color: '#a16207' }}>Requieren atención inmediata</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center gap-3">
+            <AlertTriangle size={24} className="text-yellow-600" />
+            <div className="flex-1">
+              <p className="font-medium text-yellow-800">{pending.length} pedidos pendientes</p>
+              <p className="text-sm text-yellow-700">Requieren atención inmediata</p>
             </div>
-            <Link href="/pedidos?status=pending" style={{ padding: '0.25rem 0.75rem', background: '#ca8a04', color: '#fff', borderRadius: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Ver</Link>
+            <Link href="/pedidos?status=pending" className="px-3 py-1 bg-yellow-600 text-white rounded-lg text-sm font-medium">Ver</Link>
           </div>
           {ready.length > 0 && (
-            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.75rem', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <CheckCircle size={24} color="#16a34a" />
-              <div style={{ flex: 1 }}>
-                <p style={{ fontWeight: 500, color: '#14532d' }}>{ready.length} pedidos listos</p>
-                <p style={{ fontSize: '0.875rem', color: '#15803d' }}>Listos para recoger</p>
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+              <CheckCircle size={24} className="text-green-600" />
+              <div className="flex-1">
+                <p className="font-medium text-green-800">{ready.length} pedidos listos</p>
+                <p className="text-sm text-green-700">Listos para recoger</p>
               </div>
-              <Link href="/pedidos?status=ready" style={{ padding: '0.25rem 0.75rem', background: '#16a34a', color: '#fff', borderRadius: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Ver</Link>
+              <Link href="/pedidos?status=ready" className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm font-medium">Ver</Link>
             </div>
           )}
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        <div style={{ background: '#fff', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>Ingresos Totales</p>
-              <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#16a34a' }}>${grandTotal.toFixed(2)}</p>
-            </div>
-            <DollarSign size={40} color="#d1d5db" style={{ opacity: 0.3 }} />
-          </div>
-          <div style={{ marginTop: '0.75rem', display: 'flex', gap: '1rem', fontSize: '0.75rem' }}>
-            <span style={{ color: '#2563eb' }}>Mostrador: ${totalManual.toFixed(2)}</span>
-            <span style={{ color: '#7c3aed' }}>Online: ${totalOnline.toFixed(2)}</span>
-          </div>
-        </div>
-
-        <div style={{ background: '#fff', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>Pedidos Completados</p>
-              <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2563eb' }}>{(orders ?? []).filter((o: any) => o.status === 'completed').length}</p>
-            </div>
-            <CheckCircle size={40} color="#d1d5db" style={{ opacity: 0.3 }} />
-          </div>
-          <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.5rem' }}>Ticket promedio: ${(summary?.avg_order ?? 0).toFixed(2)}</p>
-        </div>
-
-        <div style={{ background: '#fff', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>Pedidos Activos</p>
-              <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#d97706' }}>{(orders ?? []).filter((o: any) => ['pending','confirmed','preparing','ready'].includes(o.status)).length}</p>
-            </div>
-            <Clock size={40} color="#d1d5db" style={{ opacity: 0.3 }} />
-          </div>
-          <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.5rem' }}>En proceso</p>
-        </div>
-
-        <div style={{ background: '#fff', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>Cierres de Caja</p>
-              <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#7c3aed' }}>{closes.length}</p>
-            </div>
-            <Package size={40} color="#d1d5db" style={{ opacity: 0.3 }} />
-          </div>
-          <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.5rem' }}>Registrados</p>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Ingresos Totales" value={`$${grandTotal.toFixed(2)}`} icon={DollarSign} color="text-green-600" subtitle={<><span className="text-blue-600">Mostrador: ${totalManual.toFixed(2)}</span> <span className="text-purple-600">Online: ${totalOnline.toFixed(2)}</span></>} />
+        <StatCard title="Pedidos Completados" value={orders.filter(o => o.status === 'completed').length} icon={CheckCircle} color="text-blue-600" subtitle={`Ticket promedio: $${(summary?.avg_order ?? 0).toFixed(2)}`} />
+        <StatCard title="Pedidos Activos" value={orders.filter(o => ['pending','confirmed','preparing','ready'].includes(o.status)).length} icon={Clock} color="text-amber-600" subtitle="En proceso" />
+        <StatCard title="Cierres de Caja" value={closes.length} icon={Package} color="text-purple-600" subtitle="Registrados" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
-        <div style={{ background: '#fff', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
-          <h3 style={{ fontWeight: 600, color: '#111827', marginBottom: '1rem' }}>Ventas por Día (últimos 14 días)</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h3 className="font-semibold text-gray-900 mb-4">Ventas por Día (últimos 14 días)</h3>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={chartData}>
@@ -152,36 +129,76 @@ export default function AdminDashboard() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ height: '250px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>Sin datos disponibles</div>
+            <div className="h-[250px] flex items-center justify-center text-gray-400">Sin datos disponibles</div>
           )}
         </div>
 
-        <div style={{ background: '#fff', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
-          <h3 style={{ fontWeight: 600, color: '#111827', marginBottom: '1rem' }}>Pedidos por Estado</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h3 className="font-semibold text-gray-900 mb-4">Pedidos por Estado</h3>
+          <div className="flex flex-col gap-3">
             {statusCounts.map(item => (
-              <div key={item.status} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: item.dot }} />
-                  <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>{item.label}</span>
+              <div key={item.status} className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full" style={{ background: item.dot }} />
+                  <span className="text-sm text-gray-600">{item.label}</span>
                 </div>
-                <span style={{ fontWeight: 600, color: item.color }}>{item.count}</span>
+                <span className="font-semibold" style={{ color: item.color }}>{item.count}</span>
               </div>
             ))}
           </div>
-          <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Total</span>
-            <span style={{ fontWeight: 700, color: '#111827' }}>{(orders ?? []).length}</span>
+          <div className="mt-4 pt-4 border-t flex justify-between">
+            <span className="text-gray-500 text-sm">Total</span>
+            <span className="font-bold text-gray-900">{orders.length}</span>
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        {cardLink('/admin/productos', '#fff', '#fef3c7', ShoppingBag, '#d97706', 'Productos', 'Gestionar catálogo')}
-        {cardLink('/admin/categorias', '#fff', '#fce7f3', Grid3X3, '#db2777', 'Categorías', 'Gestionar categorías')}
-        {cardLink('/pedidos', '#fff', '#dbeafe', Package, '#2563eb', 'Pedidos', 'Ver todos los pedidos')}
-        {cardLink('/contabilidad', '#fff', '#dcfce7', DollarSign, '#16a34a', 'Contabilidad', 'Reportes detallados')}
-        {cardLink('/admin/usuarios', '#fff', '#f3e8ff', Users, '#7c3aed', 'Usuarios', 'Gestionar equipo')}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <Link href="/admin/productos" className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="p-3 bg-amber-100 rounded-lg">
+            <ShoppingBag size={24} className="text-amber-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Productos</h3>
+            <p className="text-sm text-gray-500">Gestionar catálogo</p>
+          </div>
+        </Link>
+        <Link href="/admin/categorias" className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="p-3 bg-pink-100 rounded-lg">
+            <Grid3X3 size={24} className="text-pink-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Categorías</h3>
+            <p className="text-sm text-gray-500">Gestionar categorías</p>
+          </div>
+        </Link>
+        <Link href="/pedidos" className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="p-3 bg-blue-100 rounded-lg">
+            <Package size={24} className="text-blue-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Pedidos</h3>
+            <p className="text-sm text-gray-500">Ver todos los pedidos</p>
+          </div>
+        </Link>
+        <Link href="/contabilidad" className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="p-3 bg-green-100 rounded-lg">
+            <DollarSign size={24} className="text-green-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Contabilidad</h3>
+            <p className="text-sm text-gray-500">Reportes detallados</p>
+          </div>
+        </Link>
+        <Link href="/admin/usuarios" className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="p-3 bg-purple-100 rounded-lg">
+            <Users size={24} className="text-purple-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Usuarios</h3>
+            <p className="text-sm text-gray-500">Gestionar equipo</p>
+          </div>
+        </Link>
       </div>
     </div>
   );

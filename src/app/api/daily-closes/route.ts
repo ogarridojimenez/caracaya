@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
 
-  const { close_date, cash_total, card_total, transfer_total, notes } = body;
+  const { close_date, total_amount, notes } = body;
 
   if (!close_date) {
     return NextResponse.json({ error: 'close_date es requerido' }, { status: 400 });
@@ -96,11 +96,10 @@ export async function POST(request: NextRequest) {
     .from('daily_closes')
     .insert({
       close_date,
-      cash_total: cash_total ?? 0,
-      card_total: card_total ?? 0,
-      transfer_total: transfer_total ?? 0,
+      total_amount: total_amount ?? 0,
+      subtotal: total_amount ?? 0,
       notes: notes ?? '',
-      created_by: userId,
+      user_id: userId,
     })
     .select()
     .single();

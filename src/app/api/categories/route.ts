@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { withAuth, isAdmin } from '@/lib/auth/helpers';
+import { validateBody, categorySchema } from '@/lib/validations';
 
 export async function GET(request: NextRequest) {
   const auth = await withAuth(request);
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('categories')
-    .select('*')
+    .select('id, name, slug, description, image_url, sort_order, is_active, created_at, updated_at')
     .order(adminMode ? 'sort_order' : 'name');
 
   if (error) {
@@ -28,10 +29,10 @@ export async function POST(request: NextRequest) {
   const auth = await withAuth(request, ['manager_admin']);
   if ('error' in auth) return auth.error;
 
+  const { supabase } = auth.success;
   const body = await request.json();
 
   if (body.orders && Array.isArray(body.orders)) {
-    const { supabase } = auth.success;
     const updates = body.orders.map(({ id, sort_order }: { id: string; sort_order: number }) =>
       supabase.from('categories').update({ sort_order }).eq('id', id)
     );
@@ -41,10 +42,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   }
 
-  const { supabase } = auth.success;
+  const validation = categorySchema.safeParse(body);
+  if (!validation.success) {
+    const message = validation.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+    return NextResponse.json({ error: `Validation failed: ${message}` }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from('categories')
-    .insert(body)
+    .insert(validation.data)
     .select()
     .single();
 

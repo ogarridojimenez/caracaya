@@ -1,4 +1,4 @@
-# Plan de Desarrollo — Caracaya
+# Plan de Desarrollo — Caraballo
 
 ## Resumen de Roles y Rutas
 
@@ -157,7 +157,7 @@ Login exitoso → verificar rol → redirect a:
 ## Estado Actual (12 mayo 2026)
 
 ### ✅ Completado
-- Landing page Caracaya (dulces, refrescos, comida)
+- Landing page Caraballo (dulces, refrescos, comida)
 - Login + redirect por rol
 - Menú, carrito, checkout, pedidos (cliente)
 - Dashboard vendedor con stats y gráficos

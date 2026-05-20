@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X } from 'lucide-react';
 import type { FileUploadProps, FileWithPreview, UseFileUploadReturn } from './types';
@@ -128,12 +129,13 @@ export function FileUpload({
 
       {previews.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {previews.map((file, index) => (
-            <div key={file.name + index} className="relative group">
-              <img
-                src={file.preview}
+          {previews.filter((f) => f.preview).map((file, index) => (
+            <div key={file.name + index} className="relative group h-20 w-20">
+              <Image
+                src={file.preview!}
                 alt={file.name}
-                className="h-20 w-20 object-cover rounded-lg"
+                fill
+                className="object-cover rounded-lg"
               />
               <button
                 type="button"

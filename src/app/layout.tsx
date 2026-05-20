@@ -1,15 +1,28 @@
 import type { Metadata, Viewport } from 'next';
+import { Playfair_Display, DM_Sans } from 'next/font/google';
 import './globals.css';
 import { LayoutProviders } from './layout-providers';
 
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'Caracaya - Dulces, Refrescos y Comida',
+  title: 'Caraballo - Dulces, Refrescos y Comida',
   description: 'Sistema de pedidos para dulces, refrescos y comida',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Caracaya',
+    title: 'Caraballo',
   },
 };
 
@@ -26,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html lang="es" className={`${playfair.variable} ${dmSans.variable}`}>
       <body suppressHydrationWarning>
         <LayoutProviders>{children}</LayoutProviders>
       </body>

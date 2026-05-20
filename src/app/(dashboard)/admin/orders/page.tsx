@@ -4,7 +4,13 @@ import { useState, useEffect } from 'react';
 import { useOrders, useUpdateOrderStatus } from '@/features/orders/hooks';
 import { Package, Search, Clock, Check, X, AlertCircle, ChevronRight, Filter, Wifi, WifiOff } from 'lucide-react';
 import toast from 'react-hot-toast';
-import type { OrderStatus } from '@/domain/types/database';
+import type { OrderStatus, Order } from '@/domain/types/database';
+
+interface OrderWithUser extends Order {
+  user?: {
+    full_name?: string | null;
+  };
+}
 import { useNotifications } from '@/hooks/use-notifications';
 
 const statusConfig: Record<OrderStatus, { label: string; color: string; bgColor: string; nextStatus: OrderStatus | null }> = {
@@ -45,7 +51,7 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const filteredOrders = orders?.filter((order: any) => {
+  const filteredOrders = orders?.filter((order: OrderWithUser) => {
     const matchesSearch =
       order.order_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||  
       order.user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());

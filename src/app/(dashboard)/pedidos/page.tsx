@@ -4,15 +4,25 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks';
 import { useOrders, useUpdateOrderStatus } from '@/features/orders/hooks';
-import { Clock, Check, X, AlertCircle, Users, Package, Search, ChevronRight, Bell, Volume2, VolumeX, LayoutGrid, List, RotateCcw, Trash2 } from 'lucide-react';
+import { Clock, Check, X, AlertCircle, Users, Package, Search, ChevronRight, Bell, Volume2, VolumeX, LayoutGrid, List, RotateCcw, Trash2, LucideIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
-import type { OrderStatus } from '@/domain/types/database';
+import type { OrderStatus, Order, OrderItem } from '@/domain/types/database';
 import { useCartStore } from '@/store';
 import { SkeletonKanban, SkeletonList } from '@/components/ui/skeleton';
 
+interface OrderWithItems extends Order {
+  items?: OrderItem[];
+  order_items?: OrderItem[];
+  user?: {
+    full_name?: string | null;
+  };
+}
+
+const isStaff = (role: string) => role === 'vendedor' || role === 'manager_admin';
+
 const KANBAN_STATUSES: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'ready', 'completed'];
 
-const statusConfig: Record<OrderStatus, { label: string; color: string; bgColor: string; borderColor: string; icon: any }> = {
+const statusConfig: Record<OrderStatus, { label: string; color: string; bgColor: string; borderColor: string; icon: LucideIcon }> = {
   pending: { label: 'Pendiente', color: 'text-yellow-800', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200', icon: Clock },
   confirmed: { label: 'Confirmado', color: 'text-blue-800', bgColor: 'bg-blue-50', borderColor: 'border-blue-200', icon: AlertCircle },
   preparing: { label: 'Preparando', color: 'text-orange-800', bgColor: 'bg-orange-50', borderColor: 'border-orange-200', icon: Clock },
@@ -29,8 +39,6 @@ const nextStatusMap: Record<OrderStatus, OrderStatus | null> = {
   completed: null,
   cancelled: null,
 };
-
-const isStaff = (role: string) => role === 'vendedor' || role === 'manager_admin';
 
 interface OrderTimerProps {
   createdAt: string;
@@ -64,11 +72,11 @@ function OrderTimer({ createdAt }: OrderTimerProps) {
 }
 
 interface OrderCardProps {
-  order: any;
+  order: OrderWithItems;
   isStaffUser: boolean;
   isClientOwner: boolean;
   onStatusChange: (orderId: string, status: OrderStatus) => void;
-  onReorder: (items: any[]) => void;
+  onReorder: (items: OrderItem[]) => void;
   isUpdating: boolean;
 }
 
@@ -94,7 +102,7 @@ function OrderCard({ order, isStaffUser, isClientOwner, onStatusChange, onReorde
       </div>
 
       <div className="space-y-1 mb-3">
-        {items.map((item: any, idx: number) => (
+        {items.map((item: OrderItem, idx: number) => (
           <div key={idx} className="text-xs text-gray-600 flex justify-between gap-2">
             <span><span className="text-amber-600 font-medium">{item.quantity}x</span> {item.product_name}</span>
             <span className="text-gray-500 whitespace-nowrap">${item.unit_price.toFixed(2)}</span>
@@ -115,10 +123,10 @@ function OrderCard({ order, isStaffUser, isClientOwner, onStatusChange, onReorde
       <div className="flex items-center justify-between mt-2 pt-2 border-t">
         <span className="text-sm font-semibold text-amber-600">${order.total.toFixed(2)}</span>
         <div className="flex items-center gap-2">
-          {(canCancel || !isStaffUser) && (
+          {canCancel && (
             <button
               onClick={() => onStatusChange(order.id, 'cancelled')}
-              disabled={isUpdating || (canCancel && order.status !== 'pending')}
+              disabled={isUpdating}
               className="p-1.5 text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
               title="Cancelar pedido"
             >
@@ -165,7 +173,7 @@ export default function PedidosPage() {
   const router = useRouter();
   const loadFromOrder = useCartStore(state => state.loadFromOrder);
 
-  const { data: ordersResponse, isLoading, error } = useOrders(isStaffUser ? undefined : user?.id);
+  const { data: ordersResponse, isLoading, error } = useOrders();
   const orders = ordersResponse?.data ?? [];
   const updateStatus = useUpdateOrderStatus();
 
@@ -201,7 +209,7 @@ export default function PedidosPage() {
     }
   };
 
-  const handleReorder = (items: any[]) => {
+  const handleReorder = (items: OrderItem[]) => {
     loadFromOrder(items);
     toast.success('Productos agregados al carrito');
     router.push('/');
@@ -212,7 +220,7 @@ export default function PedidosPage() {
     const matchesSearch =
       order.order_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      orderItems.some((item: any) =>
+      orderItems.some((item: OrderItem) =>
         item.product_name?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     return matchesSearch;
@@ -306,7 +314,7 @@ export default function PedidosPage() {
           <h2 className="text-xl font-medium text-gray-900 mb-2">{emptyMessage}</h2>
           {searchQuery && (
             <p className="text-gray-500 text-sm mt-2">
-              No se encontraron pedidos para "{searchQuery}"
+              No se encontraron pedidos para &quot;{searchQuery}&quot;
             </p>
           )}
         </div>
@@ -398,7 +406,7 @@ export default function PedidosPage() {
 
                 <div className="p-4">
                   <div className="space-y-2">
-                    {items.map((item: any) => (
+                    {items.map((item: OrderItem) => (
                       <div key={item.id} className="flex justify-between text-sm">
                         <span className="text-gray-700">
                           <span className="font-medium text-amber-600">{item.quantity}x</span> {item.product_name}

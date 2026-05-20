@@ -1,13 +1,24 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth } from '@/lib/auth/helpers';
+
+interface DailyGroup {
+  date: string;
+  order_count: number;
+  revenue: number;
+  refunds: number;
+}
+
+interface OrderRow {
+  created_at: string;
+  status: string;
+  total: number;
+}
 
 export async function GET(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request, ['manager_admin', 'vendedor']);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const { supabase } = auth.success;
 
   const { searchParams } = new URL(request.url);
   const startDate = searchParams.get('startDate');
@@ -27,10 +38,11 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[API/orders/daily]', error.message);
+    return NextResponse.json({ error: 'Error al obtener pedidos diarios' }, { status: 500 });
   }
 
-  const grouped = data.reduce((acc: Record<string, any>, order: any) => {
+  const grouped = (data ?? []).reduce<Record<string, DailyGroup>>((acc, order: OrderRow) => {
     const date = new Date(order.created_at).toISOString().split('T')[0];
     if (!acc[date]) {
       acc[date] = { date, order_count: 0, revenue: 0, refunds: 0 };
@@ -44,7 +56,7 @@ export async function GET(request: NextRequest) {
     return acc;
   }, {});
 
-  const result = Object.values(grouped).sort((a: any, b: any) => a.date.localeCompare(b.date));
+  const result = Object.values(grouped).sort((a: DailyGroup, b: DailyGroup) => a.date.localeCompare(b.date));
 
   return NextResponse.json({ data: result });
 }

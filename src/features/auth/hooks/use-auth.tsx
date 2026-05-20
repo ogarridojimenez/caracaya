@@ -92,6 +92,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const result = await authApi.login(email, password);
       if (result.user) {
+        setUser({
+          id: result.user.id,
+          email: result.user.email,
+          full_name: result.user.full_name,
+          role: result.user.role as UserRole,
+        });
         const role = result.user.role as UserRole;
         router.push(roleRoutes[role] ?? '/carrito');
       }

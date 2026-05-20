@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useCategories, useCreateProduct, useUpdateProduct } from '../hooks';
 import * as productsApi from '@/lib/api/products';
 import toast from 'react-hot-toast';
@@ -172,7 +173,7 @@ export function ProductFormModal({ isOpen, onClose, product }: ProductFormModalP
           <div>
             <label className="block text-sm font-medium">Imagen</label>
             <input type="file" accept="image/*" onChange={handleImageChange} className="w-full" />
-            {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 h-20 rounded" />}
+            {imagePreview && <Image src={imagePreview} alt="Preview" width={80} height={80} className="mt-2 h-20 rounded object-cover" />}
           </div>
 
           <label className="flex items-center gap-2">

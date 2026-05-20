@@ -1,23 +1,26 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { withAuth } from '@/lib/auth/helpers';
+
+interface StockCheckItem {
+  productId: string;
+  quantity: number;
+}
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request);
+  if ('error' in auth) return auth.error;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const { supabase } = auth.success;
 
   try {
     const body = await request.json();
-    const { items } = body;
+    const { items } = body as { items: StockCheckItem[] };
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Se requiere una lista de productos' }, { status: 400 });
     }
 
-    const productIds = items.map((item: any) => item.productId);
+    const productIds = items.map((item: StockCheckItem) => item.productId);
 
     const { data: products, error } = await supabase
       .from('products')
@@ -25,10 +28,11 @@ export async function POST(request: NextRequest) {
       .in('id', productIds);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('[API/products/stock]', error.message);
+      return NextResponse.json({ error: 'Error al verificar stock' }, { status: 500 });
     }
 
-    const stockInfo = items.map((item: any) => {
+    const stockInfo = items.map((item: StockCheckItem) => {
       const product = products?.find(p => p.id === item.productId);
       
       if (!product) {
@@ -66,7 +70,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const auth = await withAuth(request);
+  if ('error' in auth) return auth.error;
+
+  const { supabase } = auth.success;
 
   const { searchParams } = new URL(request.url);
   const productId = searchParams.get('productId');
@@ -82,7 +89,8 @@ export async function GET(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[API/products/stock GET]', error.message);
+    return NextResponse.json({ error: 'Error al consultar stock' }, { status: 500 });
   }
 
   return NextResponse.json({

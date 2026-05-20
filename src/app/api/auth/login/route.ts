@@ -1,19 +1,26 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
+import { validateBody, loginSchema } from '@/lib/validations';
 
 export async function POST(request: NextRequest) {
   const identifier = getRateLimitIdentifier(request);
-  
-  if (!checkRateLimit(identifier)) {
+
+  const rateLimit = checkRateLimit(identifier, 'login');
+  if (!rateLimit.allowed) {
     return NextResponse.json(
       { error: 'Demasiados intentos. Intenta de nuevo en 1 minuto.' },
       { status: 429 }
     );
   }
 
+  const validation = await validateBody(request, loginSchema);
+  if (!validation.success) {
+    return validation.error;
+  }
+
   const supabase = createServerSupabaseClient(request);
-  const { email, password } = await request.json();
+  const { email, password } = validation.data;
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,

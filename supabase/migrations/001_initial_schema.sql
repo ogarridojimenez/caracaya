@@ -208,7 +208,7 @@ CREATE POLICY "Staff can manage products" ON products
     EXISTS (
       SELECT 1 FROM users
       WHERE users.id = auth.uid()
-      AND users.role IN ('barista', 'manager', 'admin')
+      AND users.role IN ('vendedor', 'manager_admin')
     )
   );
 
@@ -222,7 +222,7 @@ CREATE POLICY "Staff can manage categories" ON categories
     EXISTS (
       SELECT 1 FROM users
       WHERE users.id = auth.uid()
-      AND users.role IN ('manager', 'admin')
+      AND users.role IN ('manager_admin')
     )
   );
 
@@ -236,7 +236,7 @@ CREATE POLICY "Staff can view all orders" ON orders
     EXISTS (
       SELECT 1 FROM users
       WHERE users.id = auth.uid()
-      AND users.role IN ('barista', 'manager', 'admin')
+      AND users.role IN ('vendedor', 'manager_admin')
     )
   );
 
@@ -250,7 +250,7 @@ CREATE POLICY "Staff can update orders" ON orders
     EXISTS (
       SELECT 1 FROM users
       WHERE users.id = auth.uid()
-      AND users.role IN ('barista', 'manager', 'admin')
+      AND users.role IN ('vendedor', 'manager_admin')
     )
   );
 
@@ -265,7 +265,7 @@ CREATE POLICY "Order items follow order access" ON order_items
         OR EXISTS (
           SELECT 1 FROM users
           WHERE users.id = auth.uid()
-          AND users.role IN ('barista', 'manager', 'admin')
+          AND users.role IN ('vendedor', 'manager_admin')
         )
       )
     )
@@ -277,7 +277,7 @@ CREATE POLICY "Staff can manage transactions" ON transactions
     EXISTS (
       SELECT 1 FROM users
       WHERE users.id = auth.uid()
-      AND users.role IN ('manager', 'admin')
+      AND users.role IN ('manager_admin')
     )
   );
 

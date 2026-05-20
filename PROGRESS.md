@@ -1,4 +1,4 @@
-# Caracaya - Sistema de Gestión
+# Caraballo - Sistema de Gestión
 
 **URL Producción:** https://caracaya.vercel.app
 **Repo:** https://github.com/ogarridojimenez/caracaya
@@ -63,7 +63,7 @@ Login exitoso → verificar rol → redirect a:
 - [x] Exportar pedidos a CSV
 
 ### General
-- [x] Landing page con branding Caracaya
+- [x] Landing page con branding Caraballo
 - [x] Navbar responsive (hamburger en móvil)
 - [x] Perfil de usuario (cambiar nombre, contraseña)
 - [x] Subida de imágenes a Supabase Storage
@@ -130,8 +130,8 @@ Cliente → Vendedor → Admin (cada rol hereda funcionalidades anteriores)
 
 ### 12 mayo 2026
 - Fix TypeScript errors para build de producción
-- Actualizado landing page de "cafetería" a "Caracaya" (dulces, refrescos, comida)
-- Actualizado navbar con nombre Caracaya y logo Cake
+- Actualizado landing page de "cafetería" a "Caraballo" (dulces, refrescos, comida)
+- Actualizado navbar con nombre Caraballo y logo Cake
 - Implementado Kanban visual para vendedor/admin
 - Agregado productos y precios en tarjetas del kanban
 - API orders ahora incluye order_items y user

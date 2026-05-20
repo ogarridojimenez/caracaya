@@ -1,4 +1,4 @@
-# Valoración del Proyecto Caracaya
+# Valoración del Proyecto Caraballo
 
 ## 📊 Valoración General
 

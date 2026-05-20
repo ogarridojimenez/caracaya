@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { withAuth } from '@/lib/auth/helpers';
+import { validateBody, categoryUpdateSchema } from '@/lib/validations';
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +13,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('categories')
-    .select('*')
+    .select('id, name, slug, description, image_url, sort_order, is_active, created_at, updated_at')
     .eq('id', params.id)
     .single();
 
@@ -27,12 +28,16 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   const auth = await withAuth(request, ['manager_admin']);
   if ('error' in auth) return auth.error;
 
+  const validation = await validateBody(request, categoryUpdateSchema);
+  if (!validation.success) {
+    return validation.error;
+  }
+
   const { supabase } = auth.success;
-  const body = await request.json();
 
   const { data, error } = await supabase
     .from('categories')
-    .update(body)
+    .update(validation.data)
     .eq('id', params.id)
     .select()
     .single();

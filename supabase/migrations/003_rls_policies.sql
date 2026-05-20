@@ -53,6 +53,9 @@ CREATE POLICY "Vendedor see all orders" ON orders FOR SELECT USING (
 CREATE POLICY "Cliente can create own orders" ON orders FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Staff can update orders" ON orders FOR UPDATE USING (
   EXISTS (SELECT 1 FROM users u WHERE u.id = auth.uid() AND u.role IN ('vendedor', 'manager_admin'))
+  OR (
+    auth.uid() = user_id AND status = 'pending'
+  )
 );
 
 -- =====================================================
